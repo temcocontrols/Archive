@@ -1,0 +1,203 @@
+WinT3000 Schedule
+------------------
+
+
+
+I. The WinT3000 work areas:
+
+	Based on their actions and the objects they are manipulated, the work can be
+divided in a few areas:
+
+    1. database components - working with grids (worksheets):
+                                  - displaying data from a panel memory
+                                  - edit data
+                                  - send data to a panel memory
+                                  - print data from a grid
+
+    2. editor and control basic language compiler
+
+    3. screens  - manipulating objects
+                - pictures
+                - icons
+
+    4. tools for data analysis and data presentation:
+                    - graphs
+                    - trend logs
+                    - tables of values
+                    - statistics
+
+    5. panel maintenance functions
+                    - get, send, load, save program file functions
+                    - clear panel
+                    - update OS
+                    - file transfer function
+                    - save network
+
+    6. configuration  - communications
+                      - panel configuration
+                      - panel setup
+                      - security - login passwords, security levels
+
+    7. alarms system
+
+    8. session functions
+                    - login
+                    - descriptors
+                    - establish a connection and disconnect functions
+                    - selecting a panel
+                    - logout
+
+    9. status       - panel status
+                    - network status
+
+   10. reports
+
+   11. on line documentation
+
+   12. other specific functions
+
+   13. modules not related to the user interface
+
+
+II. Plan
+--------
+
+	I defined here a plan for the next days. As I will go further with the spec,
+I will go further with the plan. I classified the activity in groups that can be
+done simultaneously by the programmers, based also on what is already wrote in
+the spec.
+
+   1. Grids
+       The 'Inputs' command            ( TF52 )
+       The 'Outputs' command           ( TF53 )
+       The 'Variables' command         ( TF54 )
+       The 'Screens' command           ( TF50 )
+       The 'Programs' command          ( TF51 )
+       The 'Controllers' command       ( TF55 )
+       The 'Weekly routines' command   ( TF56 )
+	   The Time Schedule               ( TF63 )
+       The 'Annual routines' command   ( TF57 )
+	   The Annual Schedule             ( TF64 )
+       The 'Arrays' command            ( TF58 )
+       The Array elements              ( TF65 )
+
+       The 'Tables' command
+       The 'Custom units' command
+       The 'Monitors' command
+       The 'Alarms log' command
+       The 'System list' command       ( TF20 )
+       The 'Network status' command    ( TF45 )
+
+   2.
+       The 'Get' command               ( TF38 )
+       The 'Send' command              ( TF39 )
+       The 'Load' command              ( TF40 )
+       The 'Save' command              ( TF41 )
+       Editor and control basic language compiler ( I still have to do some
+       work here)
+       The 'Update panel's OS' command        ( TF32 )
+
+   3.
+       Hardware->Communication
+       The 'Select panel' command              ( TF44 )
+       Hardware->Panel configuration
+
+
+Run this version of WinT3000.exe. I prototype every window designed in the spec.
+I will do the same for all the windows. You have just to implement them the
+way I will tell you.
+
+One should take care of all the grids. This way only one needs to study the
+database components.
+
+One can implement the TF38, TF39, TF40, TF41 windows. Meantime I will design the
+editor window and I will write the spec related to editor and compiler.
+
+One can take care of the communication part. I still have to do some work here,
+before he can start.
+
+Try to put all the code that you will wrote inside of a function and make a
+call to that function. This way, when we change something in design it will be
+easier to place the new code.
+
+
+1. Grids
+---------
+
+In baseclas.h are defined the object class for all the points:
+Str_in_point, Str_out_point, Str_variable_point, etc.
+In aio.h are defined all the points as members of aio class:
+
+	Str_out_point   				outputs[MAX_OUTS];
+	Str_in_point    				inputs[MAX_INS];
+	Str_variable_point			    vars[MAX_VARS];
+
+There is an instance of Panel class (ptr_panel) in wint3000proc.cpp:
+    Panel    *ptr_panel;  ( class Panel has aio class as its base class)
+
+
+When the user click the 'Inputs' command, 'Outputs' command, etc, the application
+will run 'void ProcReadPoints(TForm *App, DInt point_type)' in wint3000proc.cpp.
+There are a form GridForm, Grid.cpp, and Grid.h that define the work with grids.
+The application creates an entry in 'gridTable' for every open window, so we can
+keep the track of all open windows. If the connected panel is a remote panel,
+tha application requests first the data from the remote panel.
+You will notice 3 statements:
+
+//  create an object of type TGridForm
+      gridTable[i].grid = new TGridForm(App, point_type, recordcount, i);
+//  initialize the object
+      gridTable[i].grid->Setup(ds, table, title, width, readonlyfields, refresh, menu, empty);
+//  setUpData
+      gridTable[i].grid->setUpData();  - this function prepares the data that
+                     are displayed in the grid. Every grid reflect an underlaying
+                     data structure in the memory. Here is the relation between
+                     the data structure and the database files (tables):
+
+                      ptr_panel->outputs[MAX_OUTS]  <->   outputs.db
+	                  inputs[MAX_INS]               <->   inputs.db
+	                  vars[MAX_VARS]                <->   vars.db
+
+You can open this tables with Database Desktop:
+ Start->Programs->BorlandC++Buider->DataBaseDesktop
+
+ The code wrote in this function has an equivalent in dos version of T3000.exe,
+see pointcl.cpp:
+       int Inputs_block::GetField(int field, char *buf)
+       int Output_block::GetField(int field, char *buf)
+       int Vars_block::GetField(int field, char *buf)
+
+******** Your work ********
+What you have to do is to implement the code for editing capabilities in the
+grid and the code for the menu bar and popup menu. For now just allow the user
+to edit data and when the window is closed save all the changes to its underlaying
+data structure. See the borland documentation, the spec, and look also in
+pointcl.cpp (dos version):
+
+       int Inputs_block::Read(int field, char key)
+       int Output_block::Read(int field, char key)
+       int Var_block::Read(int field, char key)
+
+For now do this just for inputs, outputs, and variables.
+***************************
+
+--------------------------------------------------
+
+ 2. To implement the the 'Get' command, the 'Send' command, the'Load' command, and
+the 'Save' command you have to see the dos version:
+int Panel::loadprg(char *file, int contr) and void Panel::savefile(char *buf1, int local)
+in t3000.cpp, and also the the program file structure.
+For a t3000 panel you also need requests for files and directories when load or
+save a program file. See dos version, proj.cpp :
+
+uint GetFile(char *title, char *defaultname, char *path, char *term, char *ptrpath, int hx, int hy, uint noread, int bkgnd, int frgnd, int local)
+int getdirectories(char *ndir, char (*directories)[13], int nmax, int local)
+int getfiles(char *term, char (*files)[13], int nmax, int local)
+
+
+Tomorrow I will come with more details.
+
+
+
+
+

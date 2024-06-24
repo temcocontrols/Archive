@@ -1,0 +1,61 @@
+WinT3000 Schedule
+------------------
+
+
+The WinT3000 work areas:
+
+	Based on their actions and the objects they are manipulated, the work can be
+divided in a few areas:
+
+    1. database components - working with grids (worksheets):
+                                  - displaying data from a panel memory
+                                  - edit data
+                                  - send data to a panel memory
+                                  - print data from a grid
+
+    2. editor and control basic language compiler
+
+    3. screens  - manipulating objects
+                - pictures
+                - icons
+
+    4. tools for data analysis and data presentation:
+                    - graphs
+                    - trend logs
+                    - tables of values
+                    - statistics
+
+    5. panel maintenance functions
+                    - get, send, load, save program file functions
+                    - clear panel
+                    - update OS
+                    - file transfer function
+                    - save network
+
+    6. configuration  - communications
+                      - panel configuration
+                      - panel setup
+                      - security - login passwords, security levels
+
+    7. alarms system
+
+    8. session functions
+                    - login
+                    - descriptors
+                    - establish a connection and disconnect functions
+                    - selecting a panel
+                    - logout
+
+    9. status       - panel status
+                    - network status
+
+   10. reports
+
+   11. on line documentation
+
+   12. other specific functions
+
+   13. modules not related to the user interface
+
+
+

@@ -1,0 +1,44 @@
+File GRID.CPP:
+//     memmove(ptr_panel->info[point_type].address+l*ptr_panel->info[point_type].str_size, ptr_block, max_points_bank*ptr_panel->info[point_type].str_size);
+File LTGT3000.CPP:
+                                                                                 if(nitem == info[i].str_size)
+                                                                                         m = min(nitem, info[i].str_size);
+//                                                                                               fread( info[i].address+j*info[i].str_size, m, 1 ,h);
+                                                                                                 if(nitem > info[i].str_size)
+                                                                                                                fseek(h, nitem-info[i].str_size, SEEK_CUR);
+          nitem = info[i].str_size;
+                                                                                nitem = info[i].str_size;
+                                                                                 if(nitem == info[i].str_size)
+                                                                                         m = min(nitem, info[i].str_size);
+                                                                                                 fread( info[i].address+j*info[i].str_size, m, 1 ,h);
+                                                                                                 if(nitem > info[i].str_size)
+                                                                                                                fseek(h, nitem-info[i].str_size, SEEK_CUR);
+File T3000R~2.CPP:
+             DInt str_size=MAXASDUSIZE
+                        str_new_size = ((Info_Table *)ptr)->str_size;
+                                        str_new_size = ((Info_Table *)ptr)->str_size;
+ DInt service, event, str_size;
+        str_size = MAXASDUSIZE;
+                  str_size = ptr_panel->info[command_number-1].str_size;
+                                                        str_size);
+File GRID1.CPP:
+//     memmove(ptr_panel->info[point_type].address+l*ptr_panel->info[point_type].str_size, ptr_block, max_points_bank*ptr_panel->info[point_type].str_size);
+File NEW1.CPP:
+                                info[i].str_size = SIZE_STR_OUT_T3000;  // sizeof( Str_out_point )
+                                info[i].str_size = SIZE_STR_IN_T3000;   // sizeof( Str_in_point )
+                                info[i].str_size = SIZE_STR_VAR_T3000;  // sizeof( Str_variable_point )
+                                info[i].str_size = SIZE_STR_CON_T3000;
+                                info[i].str_size = SIZE_STR_WR_T3000;
+                                info[i].str_size = SIZE_STR_AR_T3000;
+                                info[i].str_size = SIZE_STR_PRG_T3000;     //sizeof( Str_program_point )
+                                info[i].str_size = SIZE_STR_TBL_T3000;     //sizeof( Str_tbl_point )
+                                info[i].str_size = SIZE_STR_AMON_T3000;    // sizeof( Str_monitor_point )
+                                info[i].str_size = SIZE_STR_SCREEN_T3000;   //sizeof( Control_group_point )
+                                info[i].str_size = SIZE_STR_AY_T3000;       //sizeof( Str_array_point )
+                                info[i].str_size = sizeof( Alarm_set_point );
+                                info[i].str_size = sizeof( Units_element );
+                                info[i].str_size = sizeof( Password_point );
+                                info[i].str_size = 9*sizeof( Wr_one_day );
+                                info[i].str_size = 46;
+File POINTCL.CPP:
+ r = ptr_panel->info[point_type].str_size;

@@ -1,0 +1,10 @@
+{\rtf1\ansi \deff1{\fonttbl
+{\f0\froman CG Times (E1);}{\f1\fmodern Courier;}}{\colortbl
+\red0\green0\blue0;}
+{\stylesheet{\fs20 \snext0 Normal;}}
+\margl1440\margr1440\ftnbj\ftnrestart\revisions \sectd \sbknone\endnhere 
+
+\pard \qj\sl0 
+\plain $ Menu commands\par
+  This is a test\par
+}

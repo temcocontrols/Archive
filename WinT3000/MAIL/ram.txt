@@ -1,0 +1,71 @@
+> 2. BCBC specifications
+>     ===============
+> 
+>     1. The BCBC is still waiting for our mini. As Dale told me, they
+> had a
+>         meeting about 2 weeks ago and they still keep us on their list
+>         along with Delta and Multinet. If we will be aproved by BCBC
+> this
+>         will be a great advantage for our sales since we do not have 
+>         a market here yet.
+>     2. To meet the BCBC specifications and all our present and future
+>         needs we have to increase the static RAM memory for the
+> Mini64.
+>         This is the only solution to have a competitive product.
+>         With at least another 128K our mini will be quite competitive.
+> 
+>         Dale will be delighted with 256K, since Multinet has 128points
+>         and 512K static RAM and 2 Minis will have the same
+> capabilities
+>         but is much cheaper and flexible.
+>     3. We are looking for ways to implement at least 256K RAM memory:
+>                  - another 128K can be placed on board. Francois
+> checked
+>                    this and told me that is OK.
+>                    The price for another 128K is about $7   
+>                  - we did not find a 256K RAM memory yet
+>                  - a 512K memory is about $20              
+> 
+	[Maurice Duteau]  The ram needs enough battery power for a few
+days, so the CAP may need to be bigger. and the FLASH needs to hold alot
+of things that the ram does, so it may also need to be bigger. One thing
+I was thinking about with Doru is to make the CPU, crystal, RAM, Flash
+and CAP on a module. This way we can upgrade minis easily. Also,
+repairing minis will be easier since we can check them with "Known Good"
+CPU modules. Whatever memory chips you and Francois decide on, make this
+layout in a module which plugs into the motherboard. A low end module
+can even be designed into the mini 8x8 which is not quite finished. This
+will open the way for a high end and low end modules which can plug into
+mini 8x8's or mini64's depending on the application.
+
+
+>        Support the above prices:
+>        ----------------------------------- 
+>                    1. The price for the old NEC microcontroller was
+> $23
+>                    2. The price for the new NEC microcontroller is $11
+> and
+>                        as a bonus it is faster.
+> 
+> 
+>     What I expect from you: 
+>           -  your formal aproval for the increase of the static RAM.
+	[Maurice Duteau]  
+		Approved. What I hope to get from you in return is to
+make ALL NEW BOARD LAYOUTS, (including the Mini 8x8 and the Mini 64)
+take into account the CPU module I mentioned above. 
+>  
+>          
+> 
+> Bye,
+	[Maurice Duteau]  Bye for now....Maurice 
+	[Maurice Duteau]  
+	PS: You can tell everyone the recent 4 day trade show went very
+well. I expect we will be getting a least a couple new dealers and a
+couple new projects because of it. In the trade show environement, it is
+very important to look beautiful, even if the features are the same as
+always. One thing you could do to help us in the period we are waiting
+for WinT3000 is to allow SuperVGA 256 bit color images on the GRP
+displays and icons.
+
+

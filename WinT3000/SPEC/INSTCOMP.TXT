@@ -1,0 +1,18 @@
+How to reinstall (or install ) the WinT3000 component:
+
+1. Ccreate a new directory c:\WINT3000\CONTROLS and then copy the file
+	 'controls.zip' to it and unzip the file
+
+2. Copy 't3000reg.cpp' to c:\WINT3000
+
+3. Remove the WinT3000 component: In C++Builder IDE, run:
+	 Component->Install then in 'Installed Components' select
+	 t3000reg and, click 'Remove' button and then 'OK' button
+
+4. Install a new component (WinT3000): In C++Builder IDE, run:
+	 Component->Install->Add then Browse. Go to WinT3000 directory
+	 and select t3000reg.cpp then OK.
+
+5. open the project and build it.
+
+

@@ -1,0 +1,157 @@
+Controllers	A PID controller is a convenient tool used to direct a modulating
+output to maintain an input at setpoint.  A PID controller will likely need to
+be configured and assigned to every modulating output point connected to a panel.
+For example, consider a single zone heating system composed of a room, with one
+room temperature sensor and a hot water radiator with a modulating control valve.
+In this control system, the room temperature will be the input to the PID controller
+and a setpoint assigned in the variable's worksheet will be the setpoint to the
+controller.  The "action" of the PID controller will be reverse acting - the value
+will close as the room temperature rises, and the Proportional - P, Integral - I,
+and Derivative - D components will be set to 2-0-0 respectively.  This yields a
+zone controller that is strictly proportional without integral or derivative
+components.  The last parameter in the PID controller is the bias - B.  For a
+strictly proportional controller, the bias can be set to predefine the value
+position when the room temperature is at its setpoint.  Setting the bias to 50
+will configure the value to be at the 50% open position when the room temperature
+is at setpoint.
+
+The above PID controller is now configured to calculate an output value from
+0% to 100%.  This controller output value can now be linked to the value listed
+in the output worksheet by assigning the controller output value to the output
+point within a Control Basic program.  The radiator control valve will modulate
+from fully opened (100%) at setpoint minus 1 Degree to half opened (50%) at
+setpoint to fully closed (05) at setpoint plus 1 Degree.  All position are
+calculated by the PID controller based on the parameters entered (input,
+setpoint, actions etc.) then assigned to an output point in Control Basic.
+
+The controller worksheet contains the following  fields:
+
+Input	the name of  the controlled variable (eg. room temperature)
+
+In Value	the value of the controlled variable.
+
+A/M	indicates whether the controller is in auto or manual.  In auto, the
+controller automatically generates an output value once every scan.  When the
+controller is toggled to manual, the output value of the controller is overridden
+and remains as shown in the output column.
+
+Output	the output value of the controller, between 0% and 100%.  This value
+should be assigned to the control device (eg. hot water valve).  The value of
+the output is the mathematical sum of the four functions (PROP + RESET + RATE + BIAS).
+
+Setpoint	the setpoiny name for the controlled variable (eg. room temperature
+           setpoint).  Normally a variable is assigned to this field, however it
+           may be left blank, and an entry can be made directly to the Value field.
+           The setpoint value may also be assigned in Control Basic using CONX = value.
+
+Value	displays the value of the setpoint.
+
+A	     the action of the controller.  The action can either be direct acting
+         "+" or  reverse acting "-".  Direct acting controllers are used when a
+         larger controller output value is needed to correct a controlled variable
+         that is too high.  Reverse acting controllers are used when a larger
+         controller output value  is needed to correct a too low controlled variable.
+
+Prop	 the proportional band of the controller.  The proportional band is the
+         range through which the controller will modulate from 0-100%. For example,
+         if in the previous hot water valve system we wanted the valve to be
+         completely closed (0%) at 5 degrees below setpoint and to be completely
+         open (100%) at 5 degrees above setpoint a proportional band of 10 degrees
+         would be specified.  Any amount of deviation between the setpoint and the
+         controlled variable is known as "error" or "offset".  The proportional
+         band is the "P" in PID.
+
+Res	     the reset component specifies the number of times the magnitude of the
+         error is added or subtracted to  the output signal over time in order
+         to eliminate the offset.  For example, if a system maintained a continuous
+         error of two units, and a reset of 5 per hour were specified, the output
+         of the controller would change by ten units per hour in a direction to
+         reduce the error.  The default reset rate specified in repeats per hour
+         (hence the H in the reset field).  Toggling the H changes the reset to
+         M - number repeats per minute.  Reset can also be thought of as the time
+         integral of the error.  The term integral is the "I" in PID.
+
+Rate	the rate component creates a large swing in the output value of the controller.
+        The rate gives the controller a "kick" to minimize change at the input.
+        The time it takes for the kick to dissipate is the time entered into the
+        rate field.  This time is specified in minutes.  This component is seldom
+        required and difficult to tune - use with caution.  Rate can also be
+        thought of as the time rate of change or derivative of the error signal.
+        The term derivative is the "D" in PID.
+
+Bias	the bias is the output value a proportional controller will maintain at equilibrium.
+
+Note...	The proportional band, reset and rate parameters can also be changed using Control Basic commands.
+
+
+More:
+
+Display and Edit Modes
+As discussed in The Standard Command Bar, display and edit modes are the two
+ways of viewing and manipulating data in worksheets.  Display mode is view only
+ while edit mode allows the operator to change information in the worksheet.
+  When a worksheet is viewed in display mode, InControl updates the data from
+   the panel at user specified intervals.  This refresh rate interval is set by
+    selecting Startup Defaults from the PC_Setup menu and specifying the number
+     of seconds in the Display Mode Refresh field.
+Note...	To switch between display and edit modes, press F10 or click the Display/Edit button on the command bar.
+
+
+Editing Worksheet Fields
+Editing Worksheet Fields	Each column of a worksheet can be a specific field type with unique editing properties.
+  The following descriptions are the characteristics of the different types of fields that are found in ICW worksheets.
+More:
+
+Manual Entry Fields
+Manual Entry Fields	To edit a manual entry field, such as System Name or Input Name,
+place the mouse pointer over the field and click once with the left button.  If this
+field accepts editing and you have sufficient security access, the flashing cursor will
+appear with your selected text color highlighting any current text in that field.
+Enter new data into the field.  Press ENTER to record the change and move the cursor to the next field.
+
+
+Toggle Value Fields
+Toggle Value Fields	Toggle fields like Auto/Man are changed by choosing them with
+the left mouse button or tabbing to them from a previous field.  The value can then
+ be toggled by double clicking the left mouse button, pressing the space bar, or
+ typing the first letter of the text that specifies the desired value.
+  For example, if a field had two values Open and Close, typing 'c' in the selected
+   field would toggle the value to Close.
+
+Multiple predetermined selection fields
+Multiple predetermined selection fields	This type of field is linked to a list of
+ values or ranges that are setup in software.  By double clicking on such a field,
+  a list box similar to the one shown below will appear.  An item from the list box
+   is chosen simply by clicking once with the left mouse button and clicking OK or
+    double clicking the item.  Clicking the Cancel button keeps the value that was
+     previously in the field.
+
+Worksheet Options
+Worksheet Options	Worksheet options are used change the display properties of
+ a worksheet.  These changes can be brought about either through Options under
+ the Windows menu, or through Options by clicking the right mouse button when
+ the mouse pointer is over the fields in a worksheet.  By selecting Options the
+  user can customize the font and colour of individual worksheets.  If the Set
+  As Default button is clicked when changing these options, worksheets opened
+  afterward will inherit the same characteristics.   Reset Default restores the factory defaults.
+
+How to Resize Worksheets
+How to Resize Worksheets	Both worksheet fields and windows can be re-sized.
+ To resize a worksheet's fields, position the mouse cursor over the split between
+  columns, click the left mouse button down and drag the field to the desired size.
+    Worksheet windows in ICW are resized in the same way as standard Windows defaults.
+
+
+
+Special Markers on Worksheets
+
+
+     Panel Number, Point Type	1VARS ( 1=Panel Number, VARS=Point Type  )
+Panel Number, Point Type, Point Number	1WS1 ( 1=Panel Number, WS=Point Type, 1=Point Number )
+Panel Number is the current panel and Point Type is the mnemonic that refers to the
+ kind of point displayed in the window (eg INS or OUTS for Inputs and Outputs).
+  The Point Number is the order of a given point with reference to  points of the same kind.
+    For example, the fifth input would have a 5 appended to it as the Point Number.
+
+The panel name is the user defined text label for the current panel taken from the system list.  In the case of a subnetwork panel, the parent panel name is displayed before the sub panel reference.  At the end of the label is the point name.  The point name is the type of point that is currently being displayed.  Beside the point name two special character markers can appear on a window title bar.  The '*' character indicates that the window's data has been edited and an 'X' means that there has been a communication error loading the worksheet.  In this case, the worksheet cannot be edited.
+

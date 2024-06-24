@@ -1,0 +1,1923 @@
+The T3000 Architectural design
+==============================
+
+
+
+
+Contents:
+--------
+
+1. Constants, macros and data types
+
+    1.1 Fundamental data types
+    1.2 Macro identifiers
+
+2. Modeling control panels as a collection of objects
+
+    2.1 The standard object types
+    2.2 The standard objects definition
+        2.2.1  Output
+		2.2.2  Input
+	    2.2.3  Variable
+	    2.2.4  Controller
+	    2.2.5  Weekly routine
+			2.2.5.1  Time Schedule
+	    2.2.6  Annual routine
+			2.2.6.1  Annual Schedule
+	    2.2.7  Program
+		    2.2.7.1  Program Code
+        2.2.8  Table
+        2.2.9  Monitor
+	    2.2.10 Screen
+		    2.2.10.1  Screen Element ( Group Element )
+	    2.2.11  Array
+		    2.2.11.1  Array Element
+   2.3 Object identifiers
+		2.3.1 PointT
+		2.3.2 Point_T3000
+		2.3.2 Point_Net
+   2.4 Panel Info1 object
+   2.5 System List object
+
+3. Data structures
+
+    3.1 Configuration file structure
+    3.2 Program file structure
+
+4. How to request data
+
+    4.1  The t3000Request()
+
+5. Commands
+
+   	5.1  Output
+		  5.1.1 Read Output
+		  5.1.2 Write Output
+	5.2  Input
+	      5.2.1 Read Input
+		  5.2.2 Write Input
+	5.3  Variable
+		  5.3.1 Read Variable
+		  5.3.2 Write Variable
+	5.4  Controller
+		  5.4.1 Read Controller
+		  5.4.2 Write Controller
+	5.5  Weekly routine
+		  5.5.1 Read Weekly routine
+		  5.5.2 Write Weekly routine
+	5.6  Time schedule
+		  5.6.1 Read Time schedule
+		  5.6.2 Write Time schedule
+	5.7  Annual routine
+		  5.7.1 Read Annual routine
+		  5.7.2 Write Annual routine
+	5.8  Annual schedule
+		  5.8.1 Read Annual schedule
+		  5.8.2 Write Annual schedule
+    5.9  Program
+		  5.9.1 Read Program
+		  5.9.2 Write Program
+	5.10 Program Code
+		  5.10.1 Read Program Code
+		  5.10.2 Write Program Code
+	5.11 Table
+		  5.11.1 Read Table
+		  5.11.2 Write Table
+	5.12 Monitor
+		  5.12.1 Read Monitor
+		  5.12.2 Write Monitor
+	5.13 Screen
+			5.13.1 Read Screen
+		  5.13.2 Write Screen
+	5.14 Screen Element ( Group Element )
+    	  5.14.1 Read Screen Element
+    	  5.14.2 Write Screen Element
+	5.15 Array
+		  5.15.1 Read Array
+		  5.15.2 Read Array
+	5.16 Array Element
+		  5.16.1 Read Array Element
+
+          
+
+1. Constants and definition
+===========================
+
+1.1 Fundamental data types
+--------------------------
+
+#define DSignedChar   signed char        // 8 bits
+#define DChar         signed char        // 8 bits
+#define DByte         unsigned char      // 8 bits
+#define DInt          short int          // 16 bits
+#define DUint         unsigned short     // 16 bits
+#define DLong         long               // 32 bits
+#define DUlong        unsigned long      // 32 bits
+
+1.2 Macro identifiers
+---------------------
+
+#define T3000_OUT      0         // Output type object
+#define T3000_IN   	   1         // Input type object
+#define VAR 		   2         // Variable type object
+#define CON 		   3         // Controller type object
+#define WR 			   4         // Weekly routine type object
+#define AR 			   5         // Annual rouitne type object
+#define PRG 		   6         // Program type object
+#define TBL 	 	   7         // Table type object
+#define DMON 		   8
+#define AMON	       9         // Monitor type object
+#define GRP 	      10         // Screen type object
+#define SCREEN	     GRP         // alias for GRP
+#define AY            11         // Array type object
+
+#define ALARMM        12         //
+#define UNIT          13         // Unit type object
+#define USER_NAME     14         // Password type object
+#define PASS   USER_NAME         // alias for USER_NAME
+#define ALARMS        15
+#define WR_TIME       16         // Time Schedule type object
+#define AR_Y          17         // Annual Schedule type object
+
+#define SYSTEM_LIST   20         // System List type object
+#define NETSTAT	      21
+#define GRAPHIC_GRP   22
+#define STATION       24
+#define CSTATION      25
+
+#define AYVALUE       29         // Array Element type object
+#define ARRAY1        30
+#define AMON_INPUTS   33
+
+#define MONSETUP      40
+
+#define MAX_OUTS	         128        // maxim Output type object instances
+#define MAX_INS		         128        // maxim Input  type object instances
+#define MAX_VARS	    	 128        // maxim Variable type object instances
+#define MAX_CONS		      48        // maxim Controller type object instances
+#define MAX_WR		    	  16        // maxim Weekly routine type object instances
+#define MAX_AR			       8        // maxim Annual routine type object instances
+#define MAX_PRGS	    	  32        // maxim Program type object instances
+#define MAX_TABS    		   5        // maxim Table  type object instances
+                                        // ( analog user define tables )
+#define MAX_DIGM		       1
+#define MAX_ANALM	    	  32        // maxim Monitor type object instances
+#define MAX_GRPS 	    	  32        // maxim Screen type object instances
+#define MAX_SCREENS 	MAX_GRPS	    // alias for MAX_GRPS
+#define MAX_ARRAYS	          16        // maxim Array type object instances
+#define MAX_UNITS              8        // maxim Unit type object instances
+                                        // ( digital user define units )
+#define MAX_PASSW             10        // maxim Password type object instances
+#define MAX_ALARMS            16
+#define MAX_ALARMS_SET        16
+
+#define MAX_ELEMENT_GROUP     48        // maxim Screen Element object instances
+                                        // allowed per Screen object
+#define MAX_ELEM   MAX_ELEMENT_GROUP    // alias for MAX_ELEMENT_GROUP
+#define MAX_BUFFER_SIZE     2000        // max size for a Control Basic program code (binary code)
+#define PROGRAM_SIZE        8000        // max size for a Control Basic source (ASCII)
+#define MAX_POINTS_IN_MONITOR 14
+#define MAX_ICON_NAME_TABLE   25
+#define MAX_VIEWS              3
+
+#define YEAR_BYTES		      46
+#define MAX_INFO_TYPE         50
+#define MAX_STATIONS	      32
+#define MAX_DES	           64000
+
+#define MAX_TBL_BANK          15
+
+#define RELEASE_NUMBER		 343
+#define MAX_STAND_GROUP_ELEM  64
+
+#define MAX_RETRY		       1
+
+#define MAX_MONSET             1
+#define MAX_RECORD            50
+#define MAX_ALPHA          	  80
+#define SIZE_FULL_LABEL       21
+#define SIZE_ABRV              9
+#define SIZE_TEXT_RANGE       13         /* 12 characters for range text + null */
+#define SIZE_TEXT_UNITS        6         /* 5 characeters plus a null   */
+
+
+2. Modeling control panels as a collection of objects
+=====================================================
+
+2.1 The standard object types
+-----------------------------
+
+Object Type ID         Object Type
+--------------         -----------
+T3000_OUT     		   Output
+T3000_IN 			   Input
+VAR 		  		   Variable
+CON 		  		   Controller
+WR 					   Weekly routine
+WR_TIME     		   Time Schedule
+AR 			  		   Annual routine
+AR_Y       		       Annual Schedule
+PRG 				   Program
+                       Program Code
+TBL 	 			   Table     ( analog user define tables )
+AMON	    		   Monitor
+GRP 	   		       Screen (alias Group )
+         	   		   Screen Element (alias Group Element)
+AY        		       Array
+AYVALUE    		       Array element
+UNIT       		       User Unit ( digital user define units )
+ALARMM      		   Alarm
+USER_NAME     		   Password (alias User Name)
+
+
+2.2 The standard objects definition
+-----------------------------------
+
+2.2.1  Output
+-------------
+
+typedef struct
+{
+	char description[21]; 	     /* (21 bytes; string)*/
+	char label[9];		         /* (9 bytes; string)*/
+
+	DLong value;		         /* (4 bytes; DLong) */
+
+	DUint auto_manual	   : 1;  /* (1 bit; 0=auto, 1=manual)*/
+	DUint digital_analog   : 1;  /* (1 bit; 0=digital, 1=analog)*/
+	DUint access_level	   : 3;  /* (3 bits; 0-5)*/
+	DUint control          : 1;  /* (1 bit; 0=off, 1=on)*/
+	DUint digital_control  : 1;  /* (1 bit) NOT USED */
+	DUint decom	       	   : 1;  /* (1 bit; 0=ok, 1=point decommissioned)*/
+	DUint range            : 8;	 /* (1 DByte ; output_range_equate)*/
+
+	DByte m_del_low;             /* (1 DByte ; if analog then low)*/
+	DByte s_del_high;            /* (1 DByte ; if analog then high)*/
+	DUint delay_timer;           /* (2 bytes;  seconds,minutes)*/
+
+} Str_out_point;  /* 21+9+4+2+2+2 = 40 */
+
+
+2.2.2  Input
+------------
+
+typedef struct
+{
+	char description[21]; 	            /* (21 bytes; string)*/
+	char label[9];		                /* (9 bytes; string)*/
+
+	DLong value;		     		    /* (4 bytes; DLong)*/
+
+	DUint filter		          : 3;  /* (3 bits; 0=1,1=2,2=4,3=8,4=16,5=32,6=64,7=128)*/
+	DUint decom		              : 1;  /* (1 bit; 0=ok, 1=point decommissioned)*/
+	DUint sen_on		          : 1;  /* (1 bit)*/
+	DUint sen_off	              : 1;  /* (1 bit)*/
+	DUint control 	              : 1; /*  (1 bit; 0=OFF, 1=ON)*/
+	DUint auto_manual		      : 1;  /* (1 bit; 0=auto, 1=manual)*/
+	DUint digital_analog	      : 1;  /* (1 bit; 0=digital, 1=analog)*/
+	DUint calibration_sign        : 1;  /* (0 positive; 1 negativ)*/
+	DUint calibration_increment   : 1;  /* (1 bit;  0=0.1, 1=1.0)*/
+	DUint unused         	      : 5;
+
+	DByte  calibration;                 /* (8 bits; -256.0 to 256.0 / -25.6 to 25.6 (msb is sign))*/
+
+	DByte        range;	      			/* (1 DByte ; input_range_equate)*/
+
+} Str_in_point; /* 21+9+4+2+1+1 = 38 */
+
+
+2.2.3  Variable
+---------------
+
+typedef struct
+{
+	char description[21];	    /*  (21 bytes; string)*/
+	char label[9];		        /*  (9 bytes; string)*/
+
+	DLong value;		        /*  (4 bytes; float)*/
+
+	DUint auto_manual	  : 1;  /*  (1 bit; 0=auto, 1=manual)*/
+	DUint digital_analog  : 1;  /*  (1 bit; 0=digital, 1=analog)*/
+	DUint control	      : 1;  /* (1 bit; 0=off, 1=on)*/
+	DUint unused		  : 5;
+	DUint range           : 8;  /*  (1 DByte ; variable_range_equate)*/
+
+}	Str_variable_point; /* 21+9+4+2 = 36*/
+
+
+2.2.4  Controller
+-----------------
+
+typedef struct
+{
+	Point_T3000 input;	      /* (3 bytes; point)*/
+	DLong input_value; 	      /* (4 bytes; float)*/
+	DLong value;		      /* (4 bytes; float)*/
+	Point_T3000 setpoint;	  /* (3 bytes; point)*/
+	DLong setpoint_value;	  /* (4 bytes; float)*/
+	DByte units;              /* (1 DByte ; Analog_units_equate)*/
+
+	DUint auto_manual	  : 1; /* (1 bit; 0=auto, 1=manual)*/
+	DUint action		  : 1; /* (1 bit; 0=direct, 1=reverse)*/
+	DUint repeats_per_min : 1; /* (1 bit; 0=repeats/hour,1=repeats/min)*/
+	DUint unused		  : 1; /* (1 bit)*/
+	DUint prop_high	      : 4; /* (4 bits; high 4 bits of proportional bad)*/
+	DUint proportional    : 8; /* (1 DByte ; 0-2000 with prop_high)*/
+	DByte reset;	           /* (1 DByte ; 0-255)*/
+	DByte bias;	               /* (1 DByte ; 0-100)*/
+	DByte rate;	               /* (1 DByte ; 0-2.00)*/
+
+}	Str_controller_point; /* 3+4+4+3+4+1+2+3 = 24*/
+
+
+2.2.5  Weekly routine
+---------------------
+
+typedef struct
+{
+	char description[21];		 /* (21 bytes; string)*/
+	char label[9];		         /*	(9 bytes; string)*/
+
+	DUint value 			:1;  /* (1 bit; 0=off, 1=on)*/
+	DUint auto_manual		:1;  /* (1 bit; 0=auto, 1=manual)*/
+	DUint override_1_value	:1;  /* (1 bit; 0=off, 1=on)*/
+	DUint override_2_value	:1;  /* (1 bit; 0=off, 1=on)*/
+	DUint off               :1;
+	DUint unused			:11; /* (11 bits)*/
+
+	Point_T3000 override_1;	     /* (3 bytes; point)*/
+	Point_T3000 override_2;	     /* (3 bytes; point)*/
+
+}	Str_weekly_routine_point; /* 21+9+2+3+3 = 38*/
+
+
+2.2.5.1  Time Schedule
+--------------------
+
+typedef struct 		// (size = 16 DByte s)
+{
+	union {
+	 struct {
+		DByte time_on_minutes1;		// (1 DByte ; 0-59)
+		DByte time_on_hours1;		// (1 DByte ; 0-23)
+		DByte time_off_minutes1;	// (1 DByte ; 0-59)
+		DByte time_off_hours1;		// (1 DByte ; 0-23)
+		DByte time_on_minutes2;		// (1 DByte ; 0-59)
+		DByte time_on_hours2;		// (1 DByte ; 0-23)
+		DByte time_off_minutes2;	// (1 DByte ; 0-59)
+		DByte time_off_hours2;		// (1 DByte ; 0-23)
+		DByte time_on_minutes3;		// (1 DByte ; 0-59)
+		DByte time_on_hours3;		// (1 DByte ; 0-23)
+		DByte time_off_minutes3;	// (1 DByte ; 0-59)
+		DByte time_off_hours3;		// (1 DByte ; 0-23)
+		DByte time_on_minutes4;		// (1 DByte ; 0-59)
+		DByte time_on_hours4;		// (1 DByte ; 0-23)
+		DByte time_off_minutes4;	// (1 DByte ; 0-59)
+		DByte time_off_hours4;		// (1 DByte ; 0-23)
+	 } time1;
+	 char time2[16];
+	};
+} Wr_one_day;
+
+Every Weekly_routine has assign an array Wr_one_day[9].
+
+
+2.2.6  Annual routine
+---------------------
+
+typedef struct
+{
+	char description[21]; 	 /* (21 bytes; string)*/
+	char label[9];		     /* (9 bytes; string)*/
+	DUint value		   : 1;  /* (1 bit; 0=off, 1=on)*/
+	DUint auto_manual  : 1;  /* (1 bit; 0=auto, 1=manual)*/
+	DUint unused	   : 14; /* ( 12 bits)*/
+
+}	Str_annual_routine_point;   /* 21+9+2=32 bytes*/
+
+
+2.2.6.1  Annual Schedule
+----------------------
+
+Dbyte[46]
+
+Every annual routine has associate an array DByte[46], one bit for every day of
+the year ( 46*8 = 368 days).
+
+bit  012345678 012345678
+	 --------------------------------------------------------
+	|  byte0  |  byte1  | .....                              |
+	 --------------------------------------------------------
+day  1234567...............................................366
+of
+year
+
+Every bit can be 0 or 1. A value of 1 corespond to a ON state,
+a value of 0 corespond to OFF state.
+
+2.2.7 Program
+--------------
+
+typedef struct
+{
+	char description[21]; 	       // (21 bytes; string)*/
+	char label[9];			       // (9 bytes; string)*/
+
+	DUint     bytes;               // (2 bytes; size in bytes of program)*/
+	DUint     on_off        : 1;   // (1 bit; 0=off; 1=on)*/
+	DUint     auto_manual   : 1;   // (1 bit; 0=auto; 1=manual)*/
+	DUint     com_prg	    : 1;   // (1 bit; 0=normal , 1=com program)*/
+	DUint     errcode	    : 5;   // (1 bit; 0=normal end, 1=too long in program)*/
+	char      unused;              // because of mini's
+}	Str_program_point;	  /* 21+9+2+2+1 = 34 bytes*/
+
+2.2.7.1 Program Code
+--------------------
+
+
+2.2.8 Table
+-----------
+
+typedef struct
+{
+	DInt value; 		 // (2 bytes)
+	DLong unit; 		 // (4 bytes)
+}  Tbl_point;            // (size = 6 bytes)
+
+
+typedef struct
+{
+	char label[9];		      // (9 bytes; string)
+	Tbl_point table[16];      // (16*6 = 96 bytes )
+} Str_tbl_point;              // (size = 9+96 = 105 bytes)
+
+
+2.2.9 Monitor
+-------------
+
+typedef struct
+{
+	char label[9];		      	  					/* 9 bytes; string */
+
+	Point_Net        inputs[MAX_POINTS_IN_MONITOR];	/* 70 bytes; array of Point_T3000 */
+	DByte			 range[MAX_POINTS_IN_MONITOR]; /* 14 bytes */
+
+	DByte second_interval_time; 				/* 1 DByte ; 0-59 */
+	DByte minute_interval_time; 				/* 1 DByte ; 0-59 */
+	DByte hour_interval_time;   				/* 1 DByte ; 0-255 */
+
+	DByte max_time_length;      /* the length of the monitor in time units */
+
+	Views views[MAX_VIEWS];			/* 16 x MAX_VIEWS bytes */
+
+	DUint num_inputs     :4; 	/* total number of points */
+	DUint anum_inputs    :4; 	/* number of analog points */
+	DUint unit 	 		 :2; 	/* 2 bits - minutes=0, hours=1, days=2	*/
+	DUint ind_views		 :2; 	/* number of views */
+	DUint wrap_flag		 :1;		/* (1 bit ; 0=no wrap, 1=data wrapped)*/
+	DUint status		 :1;		/* monitor status 0=OFF / 1=ON */
+	DUint reset_flag	 :1; 	/* 1 bit; 0=no reset, 1=reset	*/
+	DUint double_flag	 :1; 	/* 1 bit; 0= 4 bytes data, 1= 2 bytes data */
+
+}	Str_monitor_point; 		/* 9+70+14+3+1+48+2 = 147 bytes */
+
+
+2.2.10 Screen
+-------------
+
+typedef struct
+{
+	char description[21];		/* (21 bytes; string)	*/
+	char label[9];				/* (9 bytes; string)	*/
+	char picture_file[11];		/* (11 bytes; string)	*/
+
+	DByte update_time;          /* refresh time */
+	DUint mode	     :1;		/* (1 bit ; 0=text, 1=graphic)	*/
+    DUint state      :1;        /* 1 group displayed on screen  */
+	DUint xcur_grp   :15;       /* x coordinate cursor */
+	DInt  ycur_grp;             /* y coordinate cursor */
+
+} Control_group_point;			/* (size = 46 bytes)	*/
+
+
+2.2.10.1  Screen Element ( Group Element )
+------------------------------------------
+
+typedef struct {
+	Point_Net point;              // object identified
+	DLong point_value;            // object value
+	DInt  auto_manual	    : 1;  // 0=auto, 1=manual
+	DUint digital_analog	: 1;  // 0=digital, 1=analog
+	DUint description_label : 3;  // 0=display description, 1=display label
+	DUint security	        : 2;  // 0-3 correspond to 2-5 access level
+	DUint decomisioned	    : 1;  // 0=normal, 1=point decommissioned
+	DUint units             : 8;  // range
+} Point_info;      // size = 5+4+2 = 11             
+
+typedef struct
+{
+	Point_info 	point_info; 				/* 11 bytes*/
+
+	DUint 	show_point		     : 1;
+	DUint 	icon_name_index      : 7;
+	DUint 	nr_element           : 8;
+
+	DLong   high_limit;
+	DLong   low_limit;
+
+	DUint 	graphic_y_coordinate : 10;
+	DUint 	off_low_color		 : 4;
+	DUint 	type_icon	  	     : 2;
+
+	DUint 	graphic_x_coordinate : 10;
+	DUint 	on_high_color		 : 4;
+	DUint 	display_point_name	 : 1;
+	DUint 	default_icon		 : 1;
+
+	DUint 	text_x_coordinate    : 7;
+	DUint 	modify               : 1;
+	DUint 	unused               : 1;
+	DUint 	where_point          : 2;
+	DUint 	text_y_coordinate    : 5;
+
+	signed char bkgnd_icon;
+
+	DUint		xicon            : 10;
+	DUint 	text_place			 : 4;
+	DUint 	text_present		 : 1;
+	DUint 	icon_present		 : 1;
+
+	DUint		yicon            : 10;
+	DUint 	text_size		     : 2;
+	DUint 	normal_color	     : 4;
+
+}	Str_grp_element; /*11+2+4+4+2+2+2+1+2+2 = 32*/
+
+
+2.2.11  Array
+-------------
+
+typedef struct
+{
+	char label[9];	    // (9 DByte s; string)
+	DInt  length;  	    // (2 bytes )
+} Str_array_point;  // (size = 11 DByte s)
+
+
+2.2.11.1 Array element
+----------------------
+
+typedef struct
+{
+	DLong value;
+
+} Str_ayvalue_point;   // (size = 4 bytes)
+
+
+
+
+2.3 Object identifiers
+----------------------
+
+2.3.1 PointT
+-------------
+
+/* Point*/
+class PointT{
+ public:
+	DByte number;      // object instance = point_number-1 : instance1=0, instance2=1, etc.
+	DByte point_type;  // object type = TypeID+1
+};
+
+
+2.3.2 Point_T3000
+-----------------
+
+/* Point_T3000;*/
+class Point_T3000 {
+ public:
+	DByte number;      // object instance = point_number-1 : instance1=0, instance2=1, etc.
+	DByte point_type;  // object type = TypeID+1
+	DByte panel;       // panel_number-1
+ public:
+	void setzero(void);
+	DInt zero(void);
+	DInt cmp(DByte num, DByte p_type, DByte p);
+	void putpoint( DByte num, DByte p_type, DByte p);
+	void getpoint( DByte *num, DByte *p_type, DByte *p);
+	DInt operator==(Point_T3000 a);
+	void operator=(const Point_T3000 &copy);
+};
+
+2.3.3 Point_Net
+---------------
+
+class Point_Net {
+ public:
+	DByte number;       // object instance = point_number-1 : instance1=0, instance2=1, etc.
+	DByte point_type;   // object type = TypeID+1
+	DByte panel;        // panel_number-1
+	DInt  network;      // network number
+ public:
+	void setzero(void);
+	DInt zero(void);
+	DInt cmp(	DByte num, DByte p_type, DByte p, DInt  net);
+	void putpoint(	DByte num, DByte p_type, DByte p, DInt  net);
+	void getpoint(	DByte *num, DByte *p_type, DByte *p, DInt *net);
+	DInt operator==(Point_Net compare);
+	void operator=(const Point_Net &copy);
+};
+
+
+2.4 System List object
+----------------------
+
+
+
+4. How to request data
+----------------------
+
+4.1 The t3000Request()
+----------------------
+
+After a port is installed and a connection was established, an
+application can make request to the remote panels using t3000Request() function:
+
+  DInt t3000Request(
+           DInt command, DInt arg,  DByte *data, DUint *length , DInt dest,
+		   DInt network, DInt others=0, DInt timeout=TIMEOUT_NETCALL,
+		   DByte *returnargs=NULL, DInt *length_returnargs=NULL,
+           DByte *sendargs=NULL, DInt length_sendargs=0, DByte bytearg=0
+           );
+
+  command  -  define the request. If is of type 'CommandRequest'.
+              (see define.h  for 'CommandRequest')
+  arg      -  define the argument of a command ( 2 bytes )
+  data     -  pointer to data buffer. A write command will send data from
+              this buffer. A read command will read data in this buffer.
+  length   -  pointer to data length.
+              If it is a write request, 'length' should be the length
+              of data to be sent.
+              If it is a read request, 'length' will be set by client to the
+							data length read from the remote panel.
+  dest     -  the remote panel number where the request will be directed
+  network  -  the network number of the remote panel
+  others   -  BACnetConfirmedRequestPDU = 0x00   - confirm request; the client
+                                        wait for the request to be confirmed
+              BACnetUnconfirmedRequestPDU = 0x01 - unconfirmed request; the
+                                        client does not wait for confirmation
+  timeout  -  timeout, the client wait for 'timeout' seconds before to return
+              an timeout error code
+  returnargs        - pointer to an additional data buffer returned by some commands
+  length_returnargs - pointer to the length of data returned in 'returnargs'
+                      buffer
+  sendargs          - pointer to an additional data buffer to be sent  by some
+                      commands
+  length_sendargs   - length of data pointed by 'sendargs' to be sent
+  bytearg  - define the third byte as argument of a command ( 1 bytes )
+
+The function returns:
+     SUCCESS    - the request was accomplished with succes
+     ERROR_COM  - errror request
+     USER_ABORT - error request; the user aborted the request
+
+The t3000Request() function is implemented in t3000Request.cpp.
+This source file should be added to the project.
+
+
+
+5. Commands
+-----------
+
+
+--------------------------------------------------------------------------------
+5.1 Output
+------------
+
+5.1.1 Read Output
+------------------
+
+ 1. Read all Output objects
+
+		command  = READOUTPUT_T3000
+		arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+								 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Read one Output object
+
+	  command  = READINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = T3000_OUT+1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel. In case of success
+                 the return length will be sizeof(Str_out_point)
+	  dest     = the remote panel number where the request will be directed
+		network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 3. Read a specified consequent number of Output objects
+
+    Read a consequence number of objects starting from an specified object
+    instance (point number).
+
+	  command  = READOUTPUT_T3000
+	  arg      = byte 0	: the object instance to start from = point_number-1
+								 byte 1	: bits 0-6  the number of objects to be read
+													bit  7    must be set to 1
+		data     = pointer to the data buffer where the received data is stored
+	  length   = pointer to data length. 'length' will be set by t3000Request()
+                 to the data length read from the remote panel
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.1.2 Write Output
+--------------------
+
+ 1. Write all Output objects
+
+		command  = WRITEOUTPUT_T3000
+		arg      = 0
+		data     = pointer to the data buffer to be sent
+	  length   = pointer to the data length to be sent from data buffer
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+		others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Write one Output object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = T3000_OUT+1
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer. Should be
+								 sizeof(Str_out_point)
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+		length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.2 Input
+-----------
+
+5.2.1 Read Input
+------------------
+
+ 1. Read all Input objects
+
+		command  = READINPUT_T3000
+		arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+		others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Read one Input object
+
+	  command  = READINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1     = T3000_IN+1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel. In case of success
+                 the return length will be sizeof(Str_in_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+		returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 3. Read a specified consequent number of Input objects
+
+    Read a consequence number of objects starting from an specified object
+    instance (point number).
+
+	  command  = READINPUT_T3000
+	  arg      = byte 0	: the object instance to start from = point_number-1
+                 byte 1	: bits 0-6  the number of objects to be read
+													bit  7    must be set to 1
+		data     = pointer to the data buffer where the received data is stored
+	  length   = pointer to data length. 'length' will be set by t3000Request()
+                 to the data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+		timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.2.2 Write Input
+-------------------
+
+ 1. Write all Input objects
+
+		command  = WRITEINPUT_T3000
+		arg      = 0
+		data     = pointer to the data buffer to be sent
+	  length   = pointer to the data length to be sent from data buffer
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+		length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Write one Input object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = T3000_IN+1
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer. Should be
+								 sizeof(Str_in_point)
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+		bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.3 Variable
+--------------
+
+5.3.1 Read Variable
+---------------------
+
+ 1. Read all Variable objects
+
+		command  = READVARIABLE_T3000
+		arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+		length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Read one Variable object
+
+	  command  = READINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = VAR+1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel. In case of success
+                 the return length will be sizeof(Str_variable_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+		length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 3. Read a specified consequent number of Variable objects
+
+    Read a consequence number of objects starting from an specified object
+    instance (point number).
+
+	  command  = READVARIABLE_T3000
+	  arg      = byte 0	: the object instance to start from = point_number-1
+                 byte 1	: bits 0-6  the number of objects to be read
+													bit  7    must be set to 1
+		data     = pointer to the data buffer where the received data is stored
+	  length   = pointer to data length. 'length' will be set by t3000Request()
+                 to the data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+		sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.3.2 Write Variable
+----------------------
+
+ 1. Write all Variable objects
+
+		command  = WRITEVARIABLE_T3000
+		arg      = 0
+		data     = pointer to the data buffer to be sent
+	  length   = pointer to the data length to be sent from data buffer
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+		bytearg           = 0
+
+
+ 2. Write one Variable object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = VAR+1
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer. Should be
+								 sizeof(Str_variable_point)
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.4 Controller
+----------------
+
+5.4.1 Read Controller
+-----------------------
+
+ 1. Read all controller objects
+
+		command  = READCONTROLLER_T3000
+		arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+		bytearg           = 0
+
+
+ 2. Read one Controller object
+
+	  command  = READINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = CON+1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel. In case of success
+                 the return length will be sizeof(Str_controller_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 3. Read a specified consequent number of Controller objects
+
+    Read a consequence number of objects starting from an specified object
+    instance (point number).
+
+	  command  = READCONTROLLER_T3000
+	  arg      = byte 0	: the object instance to start from = point_number-1
+								 byte 1	: bits 0-6  the number of objects to be read
+													bit  7    must be set to 1
+		data     = pointer to the data buffer where the received data is stored
+	  length   = pointer to data length. 'length' will be set by t3000Request()
+                 to the data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.4.2 Write Controller
+------------------------
+
+ 1. Write all Controller objects
+
+		command  = WRITECONTROLLER_T3000
+		arg      = 0
+		data     = pointer to the data buffer to be sent
+	  length   = pointer to the data length to be sent from data buffer
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Write one Controller object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = CON+1
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer. Should be
+								 sizeof(Str_controller_point)
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.5 Weekly routine
+--------------------
+
+5.5.1 Read Weekly routine
+---------------------------
+
+ 1. Read all Weekly routine objects
+
+		command  = READWEEKLYROUTINE_T3000
+		arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Read one Weekly routine object
+
+	  command  = READINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = WR+1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel. In case of success
+                 the return length will be sizeof(Str_weekly_routine_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 3. Read a specified consequent number of Weekly routine objects
+
+		Read a consequence number of objects starting from an specified object
+    instance (point number).
+
+	  command  = READWEEKLYROUTINE_T3000
+	  arg      = byte 0	: the object instance to start from = point_number-1
+                 byte 1	: bits 0-6  the number of objects to be read
+													bit  7    must be set to 1
+		data     = pointer to the data buffer where the received data is stored
+	  length   = pointer to data length. 'length' will be set by t3000Request()
+                 to the data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.5.2 Write Weekly routine
+----------------------------
+
+ 1. Write all Weekly routine objects
+
+		command  = WRITEWEEKLYROUTINE_T3000
+		arg      = 0
+		data     = pointer to the data buffer to be sent
+	  length   = pointer to the data length to be sent from data buffer
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Write one Weekly routine object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+		arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = WR+1
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer. Should be
+								 sizeof(Str_weekly_routine_point)
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.6 Time Schedule
+-------------------
+
+5.6.1 Read Time Schedule
+--------------------------
+
+Read data inside a Weekly routine object.
+
+	  command  =  READTIMESCHEDULE_T3000
+		arg      = weekly_routine_object_instance-1  ( weekly_routine_number-1)
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.6.2 Write Time Schedule
+---------------------------
+
+Write data inside a Weekly routine object.
+
+	  command  = WRITETIMESCHEDULE_T3000
+	  arg      = Weekly_routine_object_instance-1  ( weekly_routine_number-1 )
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.7 Annual routine
+--------------------
+
+5.7.1 Read Annual routine
+---------------------------
+
+ 1. Read all Annual routine objects
+
+		command  = READANNUALROUTINE_T3000
+		arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Read one Annual routine object
+
+		command  = READINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = AR+1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel. In case of success
+                 the return length will be sizeof(Str_annual_routine_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 3. Read a specified consequent number of Annual routine objects
+
+    Read a consequence number of objects starting from an specified object
+    instance (point number).
+
+	  command  = READANNUALROUTINE_T3000
+	  arg      = byte 0	: the object instance to start from = point_number-1
+                 byte 1	: bits 0-6  the number of objects to be read
+													bit  7    must be set to 1
+		data     = pointer to the data buffer where the received data is stored
+	  length   = pointer to data length. 'length' will be set by t3000Request()
+                 to the data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.7.2 Write Annual routine
+----------------------------
+
+ 1. Write all Annual routine objects
+
+		command  = WRITEANNUALROUTINE_T3000
+		arg      = 0
+		data     = pointer to the data buffer to be sent
+	  length   = pointer to the data length to be sent from data buffer
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Write one Annual routine object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = AR+1
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer. Should be
+								 sizeof(Str_annual_routine_point)
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.8 Annual Schedule
+---------------------
+
+5.8.1 Read Annual Schedule
+----------------------------
+
+Read data inside a Annual routine object.
+
+	  command  =  READANNUALSCHEDULE_T3000
+		arg      = Annual_routine_object_instance-1  ( annual_routine_number-1 )
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.8.2 Write Annual Schedule
+-----------------------------
+
+Write data inside a Annual routine object.
+
+		command  = WRITEANNUALSCHEDULE_T3000
+	  arg      = annual_routine_object_instance-1  ( annual_routine_number-1)
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.9 Program
+-------------
+
+5.9.1 Read Program
+--------------------
+
+ 1. Read all Program objects
+
+		command  = READPROGRAM_T3000
+		arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Read one Program object
+
+		command  = READINDIVIDUALPOINT_T3000
+		arg      = byte 0	: object_instance-1 ( = point_number-1 )
+								 byte 1	: object_type+1    = PRG+1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel. In case of success
+                 the return length will be sizeof(Str_program_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 3. Read a specified consequent number of Program objects
+
+    Read a consequence number of objects starting from an specified object
+    instance (point number).
+
+	  command  = READPROGRAM_T3000
+		arg      = byte 0	: the object instance to start from = point_number-1
+                 byte 1	: bits 0-6  the number of objects to be read
+													bit  7    must be set to 1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel
+		dest     = the remote panel number where the request will be directed
+		network  = the network number of the remote panel
+		others   = BACnetConfirmedRequestPDU
+		timeout  = TIMEOUT_NETCALL
+		returnargs        = NULL
+		length_returnargs = NULL
+		sendargs          = NULL
+		length_sendargs   = 0
+		bytearg           = 0
+
+
+5.9.2 Write Program
+---------------------
+
+ 1. Write all Program objects
+
+		command  = WRITEPROGRAM_T3000
+	  arg      = 0
+      data     = pointer to the data buffer to be sent
+	  length   = pointer to the data length to be sent from data buffer
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Write one Program object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = PRG+1
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer. Should be
+								 sizeof(Str_program_point)
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.10 Program Code
+------------------
+
+5.10.1 Read Program Code
+--------------------------
+
+Read the Control Basic program code.
+
+		command  = READPROGRAMCODE_T3000
+		arg      = Program_object_instance-1  ( program_number-1 )
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs  = pointer to an array of type DInt, with 2 elements. The data
+                    returned to this array has the following meaning:
+
+										 - the element with index 0 ( bytes 0 and 1): the amount of
+                       memory allocated for the Control Basic programs on the
+                       remote panel
+                     - the element with index 1 ( bytes 2 and 3): the amount of
+                       memory already occupied by the Control Basic programs. The
+                       difference between the amount of memory allocated and the
+                       amount of memory already occupied give us the amount of
+                       memory available (free) in the remote panel for the Control
+                       Basic program.
+	  length_returnargs = NULL  (the length of the returnargs is always 4 bytes)
+	  sendargs          = NULL
+		length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.10.2 Write Program Code
+---------------------------
+
+Write the Control Basic program code.
+
+	  command  = WRITEPROGRAMCODE_T3000
+	  arg      = Program_object_instance-1  ( program_number-1 )
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.11 Table
+------------
+
+5.11.1 Read Table
+-------------------
+
+ 1. Read all Table objects
+
+		command  = READTABLE_T3000
+		arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+		sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Read one Table object
+
+	  command  = READINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+								 byte 1	: object_type+1    = TBL+1
+		data     = pointer to the data buffer where the received data is stored
+	  length   = pointer to data length. 'length' will be set by t3000Request()
+                 to the data length read from the remote panel. In case of success
+                 the return length will be sizeof(Str_program_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+		bytearg           = 0
+
+
+5.11.2 Write Table
+--------------------
+
+ 1. Write all Table objects
+
+		command  = WRITETABLE_T3000
+		arg      = 0
+		data     = pointer to the data buffer to be sent
+	  length   = pointer to the data length to be sent from data buffer
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Write one Table object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = TBL+1
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer. Should be
+								 sizeof(Str_program_point)
+		dest     = the remote panel number where the request will be directed
+		network  = the network number of the remote panel
+		others   = BACnetConfirmedRequestPDU
+		timeout  = TIMEOUT_NETCALL
+		returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+--------------------------------------------------------------------------------
+5.12 Monitor
+------------
+
+
+--------------------------------------------------------------------------------
+5.13 Screen
+-----------
+
+5.13.1 Read Screen
+------------------
+
+ 1. Read all Screen objects
+
+		command  = READSCREEN_T3000
+		arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+		sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Read one Screen object
+
+	  command  = READINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = GRP+1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel. In case of success
+                 the return length will be sizeof(Str_program_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+		bytearg           = 0
+
+
+ 3. Read a specified consequent number of Screen objects
+
+    Read a consequence number of objects starting from an specified object
+    instance (point number).
+
+	  command  = READSCREEN_T3000
+	  arg      = byte 0	: the object instance to start from = point_number-1
+                 byte 1	: bits 0-6  the number of objects to be read
+													bit  7    must be set to 1
+		data     = pointer to the data buffer where the received data is stored
+	  length   = pointer to data length. 'length' will be set by t3000Request()
+                 to the data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+		length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.13.2 Write Screen
+-------------------
+
+ 1. Write all Screen objects
+
+	  command  = WRITESCREEN_T3000
+	  arg      = 0
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer
+		dest     = the remote panel number where the request will be directed
+		network  = the network number of the remote panel
+		others   = BACnetConfirmedRequestPDU
+		timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Write one Screen object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+                 byte 1	: object_type+1    = GRP+1
+      data     = pointer to the data buffer to be sent
+	  length   = pointer to the data length to be sent from data buffer. Should be
+                 sizeof(Control_group_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+		sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.14 Screen Element (Group Element )
+------------------------------------
+
+5.14.1 Read Screen Element
+--------------------------
+   Read the screen elements.
+
+
+--------------------------------------------------------------------------------
+5.15 Array
+----------
+
+5.15.1 Read Array
+-----------------
+
+ 1. Read all Array objects
+
+	  command  = READARRAY_T3000
+	  arg      = 0
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+		dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Read one Array object
+
+	  command  = READINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+								 byte 1	: object_type+1    = AY+1
+		data     = pointer to the data buffer where the received data is stored
+		length   = pointer to data length. 'length' will be set by t3000Request()
+								 to the data length read from the remote panel. In case of success
+								 the return length will be sizeof(Str_program_point)
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+		others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 3. Read a specified consequent number of Array objects
+
+    Read a consequence number of objects starting from an specified object
+    instance (point number).
+
+	  command  = READARRAY_T3000
+	  arg      = byte 0	: the object instance to start from = point_number-1
+								 byte 1	: bits 0-6  the number of objects to be read
+													bit  7    must be set to 1
+		data     = pointer to the data buffer where the received data is stored
+	  length   = pointer to data length. 'length' will be set by t3000Request()
+                 to the data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+		network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+5.15.2 Write Array
+------------------
+
+ 1. Write all Array objects
+
+	  command  = WRITEARRAY_T3000
+		arg      = 0
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+		timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+ 2. Write one Array object
+
+	  command  = WRITEINDIVIDUALPOINT_T3000
+	  arg      = byte 0	: object_instance-1 ( = point_number-1 )
+								 byte 1	: object_type+1    = AY+1
+		data     = pointer to the data buffer to be sent
+		length   = pointer to the data length to be sent from data buffer. Should be
+								 sizeof(Str_array_point)
+		dest     = the remote panel number where the request will be directed
+		network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+	  timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+		sendargs          = NULL
+	  length_sendargs   = 0
+	  bytearg           = 0
+
+
+--------------------------------------------------------------------------------
+5.16 Array Element
+------------------
+
+5.16.1 Read Array Element
+-------------------------
+
+Read the Array Element object
+
+		command  = READARRAYVALUE_T3000
+		arg      = Array_object_instance-1  ( array_number-1 )
+		data     = pointer to the data buffer where the received data are stored
+	  length   = pointer to data length. 'length' will be set by client to the
+                 data length read from the remote panel
+	  dest     = the remote panel number where the request will be directed
+	  network  = the network number of the remote panel
+	  others   = BACnetConfirmedRequestPDU
+		timeout  = TIMEOUT_NETCALL
+	  returnargs        = NULL
+	  length_returnargs = NULL
+	  sendargs          = NULL
+		length_sendargs   = 0
+		bytearg           = 0
+
+

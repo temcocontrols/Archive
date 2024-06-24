@@ -1,0 +1,4 @@
+:Base WinT3000.HLP
+:Title WinT3000 Help
+1 Menu commands=IDH_menu_command
+1 Dialog box=IDH_dialog_box

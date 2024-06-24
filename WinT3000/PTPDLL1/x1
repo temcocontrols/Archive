@@ -1,0 +1,79 @@
+File PTP.CPP:
+extern COMMINFO CommInfo[MAX_COMM_INFO];
+          ptp = (class PTP *)Routing_table[CommInfo[comPort].conPort()].ptr;
+ ptp = (class PTP *)Routing_table[CommInfo[comPort].conPort()].ptr;
+ ptp = (class PTP *)Routing_table[CommInfo[comPort].conPort()].ptr;
+File CONNECT.CPP:
+extern HANDLE initCommPort(DInt comPort);
+extern DInt closeCommPort(DInt comPort);
+extern COMMINFO CommInfo[MAX_COMM_INFO];
+__declspec(dllexport) void ProcCommTimerTimer(DInt comPort, DInt DelayTime);
+void ProcCommTimerTimer(DInt comPort, DInt DelayTime)
+   COMSTAT          CommState;
+    hCom = CommInfo[comPort].Handle();
+    port = CommInfo[comPort].conPort();
+//      h = CommInfo[0].handle;
+                ClearCommError(
+                                &CommState      // address of buffer for communications status
+                nRead = CommState.cbInQue;        // Number of characters in
+    if( initCommPort(comPort)==INVALID_HANDLE_VALUE )
+                closeCommPort(comPort);
+    CommInfo[comPort].conPort(conPort);
+   closeCommPort(comPort);
+   if( CommInfo[comPort].conPort()!=-1 )
+    if( Routing_table[CommInfo[comPort].conPort()].ptr )
+                 delete (class PTP *)Routing_table[CommInfo[comPort].conPort()].ptr;
+                 Routing_table[CommInfo[comPort].conPort()].ptr=NULL;
+    Routing_table[CommInfo[comPort].conPort()].status=PORT_FREE;
+    CommInfo[comPort].conPort(-1);
+  if( CommInfo[comPort].conPort() == -1 ) return;
+  ((class PTP *)Routing_table[CommInfo[comPort].conPort()].ptr)->NL_parameters.primitive = DL_DISCONNECT_REQUEST;
+                  ((class PTP *)Routing_table[CommInfo[comPort].conPort()].ptr)->Handle,        // handle of destination window
+    if( CommInfo[comPort].conPort()==-1 )
+    Routing_table[CommInfo[comPort].conPort()].port_status_vars.head_Data=0;
+    Routing_table[CommInfo[comPort].conPort()].port_status_vars.tail_Data=0;
+    Routing_table[CommInfo[comPort].conPort()].port_status_vars.overflow=0;
+        router(N_UNITDATArequest, Establish_Connection_To_Network, &r, CommInfo[comPort].conPort());
+          if( (result=checkConnection(CommInfo[comPort].conPort(), networkaddress, station_num)) != SUCCESS_REQUEST )
+       disconnectRequest(CommInfo[comPort].conPort());
+File COMSET.CPP:
+//extern    COMMINFO CommInfo[5];         /* Current line parameters */
+COMMINFO _export CommInfo[MAX_COMM_INFO];
+//DCB       CommDCB;
+//COMSTAT   CommState;
+char      szaCommPort[MAX_COMM_INFO][5]  = {
+//__declspec(dllexport) HANDLE initCommPort(COMMINFO *pCom);
+//__declspec(dllexport) void initCommPort(DInt comPort=-1);
+//__declspec(dllexport) void closeCommPort(DInt comPort=-1);
+CommINFO::CommINFO(void)
+DByte CommINFO::Connection( void )
+void CommINFO::Connection( DByte c )
+DByte CommINFO::baudRateIndex(void)
+DByte CommINFO::modemTypeIndex(void)
+void  CommINFO::modemTypeIndex(DByte mti)
+void CommINFO::modemCapabilities(ModemCapabilities &mc)
+ This function opens the serial interface specified by <CommPortId> and
+ DCB structure <CommBCD[CommPortID]>.
+         int CommPortId     0=COM1:, ... 3=COM4:
+HANDLE initCommPort(COMMINFO *pCom)
+    szaCommPort[pCom->portName()],
+ * Omit the call to SetupComm to use the default queue sizes.
+ fSuccess = GetCommState(hCom, &dcb);
+   SetupComm(
+//   CommDCB.DCBlength = sizeof(DCB);           // sizeof(DCB)
+   fSuccess = SetCommState(hCom, &dcb);
+   SetCommTimeouts(
+//   GetCommState(hCom, &CommDCB);
+HANDLE initCommPort(DInt comPort)
+                initCommPort(&CommInfo[j]);
+    h=initCommPort(&CommInfo[comPort]);
+DInt closeCommPort(DInt comPort)
+                if( CommInfo[j].Handle()!=INVALID_HANDLE_VALUE )
+                         CloseHandle(CommInfo[j].Handle());// handle of object to close
+         if( CommInfo[comPort].Handle()!=INVALID_HANDLE_VALUE )
+       r=CloseHandle(CommInfo[comPort].Handle());// handle of object to close
+       CommInfo[comPort].Handle(INVALID_HANDLE_VALUE);
+  h = CommInfo[ComNr-1].handle;
+//  WriteComm(ComNr, (LPSTR)szData, 1);
+         h = CommInfo[Cid-1].Handle();
+         PurgeComm(

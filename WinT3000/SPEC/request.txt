@@ -1,0 +1,56 @@
+t3000Request
+------------
+
+
+After a port is installed and a connection was established, an
+application can make request to the remote panels using t3000Request() function:
+
+  DInt t3000Request(
+           DInt command, DInt arg,  DByte *data, DUint *length , DInt dest,
+		   DInt network, DInt others=0, DInt timeout=TIMEOUT_NETCALL,
+		   DByte *returnargs=NULL, DInt *length_returnargs=NULL,
+           DByte *sendargs=NULL, DInt length_sendargs=0, DByte bytearg=0
+           );
+
+  command  -  define the request. If is of type 'CommandRequest'.
+              (see define.h  for 'CommandRequest')
+  arg      -  define the argument of a command ( 2 bytes )
+  data     -  pointer to data buffer. A write command will write data from
+              this buffer. A read command will read data in this buffer.
+  length   -  pointer to data length.
+              If it is a write request, 'length' should be the length
+              of data to be send.
+              If it is a read request, 'length' will be set by client to the
+              data length read from the remote panel.
+  dest     -  the remote panel number where the request will be directed
+  network  -  the network number of the remote panel
+  others   -  BACnetConfirmedRequestPDU = 0x00   - confirm request; the client
+                                        wait for the request to be confirmed
+              BACnetUnconfirmedRequestPDU = 0x01 - unconfirmed request; the
+                                        client does not wait for confirmation
+  timeout  -  timeout, the client wait for 'timeout' seconds before to return
+              an timeout error code
+  returnargs        - pointer to an additional data buffer returned by some commands
+  length_returnargs - pointer to the length of data returned in 'returnargs'
+                      buffer
+  sendargs          - pointer to an additional data buffer to be sent  by some
+                      commands
+  length_sendargs   - length of data pointed by 'sendargs' to be sent
+  bytearg  - define the third byte as argument of a command ( 1 bytes )
+
+The function returns:
+     SUCCESS    - the request was accomplished with succes
+     ERROR_COM  - errror request
+     USER_ABORT - error request; the user aborted the request
+
+The t3000Request() function is implemented in t3000Request.cpp.
+This source file should be added to the project.
+
+
+
+
+
+
+
+
+

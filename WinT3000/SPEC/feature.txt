@@ -1,0 +1,10 @@
+*  to attache a label and the unit to analog customers table
+   ( table1,..., table5)
+
+*  delay setting of all the outputs after the reset of the control panel
+
+*  keep track of the objects through the Control Basic programs, Screens and
+   Monitors. What programs, screens, and monitors control a specific object.
+   These is even necessary if need to implement a 'Move' function for the
+   objects.
+

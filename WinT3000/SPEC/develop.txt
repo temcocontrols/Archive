@@ -1,0 +1,84 @@
+Software developing
+-------------------
+
+
+A software developing involve:
+         - designing
+         - developing
+         - testing
+         - documenting 
+
+
+I. Designing the Application
+=============================
+
+
+Before a program can be implemented, it needs to be thoughtfully design:
+
+    1. design the software
+    2. a functional specification provides a means of communicating the
+       product's design
+    3. a prototype version is a useful way of determining how well the
+       interface is designed
+    4. an internal design of the program identifies the implementation
+       details
+
+
+ 1. Designing the Software
+ -------------------------
+  In a few words the designing of the software means:
+
+       a. defining the feature set that becomes the basis for the program.
+          Usually this set is narrowed from a multitude of features the program
+          could contain.
+       b. designing the user-interface: the visual presentation of the program
+
+
+ 2. The Functional Specification
+ -------------------------------
+  The functional specification is a document listing all the interface elements
+ that are visible to the user, with an explanation of what the program is
+ expected to do when the user activates or interacts with these interface
+ elements.
+  Once the features that are to be in the program and the manner in  which those
+ features will be presented to the user have been identified, these concepts
+ should be documented.
+  The functional specification provide the basis for the development team,
+ quality assuarance team, documentation team and marketing team.
+
+
+ 3. Prototyping
+ --------------
+  A software prototype is a means of visually experiencing the project's
+ essence. You get a feeling of the flow through the prototype program. You
+ gain a better appreciation of how the final project will look and feel.
+ The prototype is an excellent means for marketing and sales people, to try
+ out the program's interface and provide feedback on how well the design
+ does or does not work.
+
+
+ 4. Architectural design
+ -----------------------
+  Define the internal structure of the program. We will make use of
+  object-oriented design metodology. It identify the objects (classes) the
+  program will be composed of, their attributes (data members) and the
+  operations (methods) these objects can perform.
+  Once the objects were identified, we need to define how these objects
+  will communicate with one another.
+
+The software development is a time consuming process. The time expended in
+designing of the application is going to save a lot more amount of time later
+in developing process.
+No step can be cast in stone. To avoid having to re-implement parts of the
+application is important to get as much feedback, and as early in the
+development process, as it is possible.
+
+
+II. Developing the Application
+==============================
+
+ The developing process involve many tasks. I just want to mention two important
+tools need in this process: project management software and version control
+software.
+
+

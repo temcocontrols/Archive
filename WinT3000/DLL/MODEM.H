@@ -1,0 +1,69 @@
+// ********************** START OF MODEM.H **********************
+//
+// This header file has all of the definitions and prototypes
+// needed to use the Modem class.  This file should be included
+// by any module that uses the Modem class.
+//
+
+#ifndef _MODEM_DOT_H
+#define _MODEM_DOT_H
+
+#include "rs232.h"
+#include <stdio.h>
+//#include "mtkernel.h"
+class Serial;
+
+enum ModemError
+			{
+					MODEM_SUCCESS                 = 0,
+					MODEM_NO_RESPONSE             = -100,
+					MODEM_NO_RING                 = -101,
+					MODEM_NO_CONNECTION           = -102,
+					MODEM_DISCONNECT_FAILED       = -103,
+					MODEM_RING							= -104,
+					MODEM_USER_ABORT              = -105
+			};
+
+// The Modem class definition
+
+class Modem {
+	public:
+		 DLong  local_baud_rate;
+	protected :
+//		 Serial *serptr;
+		 RS232             *port;
+		 ModemCapabilities *modem_data;
+		 Byte tone_dial;
+		 Byte protocol;
+		 Byte compressing;
+		 DLong carrier_timeout;
+		 ModemError wait_for_response( long time );
+		 ModemError wait_for_connection( long time_out = 0 );
+		 virtual void echo( char c ) { putchar( c ); }
+		 void read_line( char *buffer, int buf_size );
+		 char *scan_strings( char *buffer, char *strings );
+
+	public :
+		 Modem( RS232 &rs232_port, char *modem_name, Serial *s );
+		 ModemError Initialize( void );
+		 ModemError Answer( void );
+		 ModemError Dial( char *number, int  = 0 );
+		 ModemError Wait_for_ring( void );
+		 ModemError Disconnect( void );
+		 ModemError SendCommand( char * );
+//	   int ReadRegister( int reg );
+		 virtual ModemError UserAbort( void );
+		 void PulseDial( void ){ tone_dial = 0; }
+		 void ToneDial( void ){ tone_dial = 1; }
+		 void SetCarrierTimeout( long length ){ carrier_timeout = length; }
+		 char *ErrorName( ModemError status );
+       virtual void DumpState( void );
+		 int Protocol( void ){ return protocol; }
+		 int Compressing( void ){ return compressing; }
+};
+
+
+#endif // #ifdef _MODEM_DOT_H
+
+// ********************** END OF MODEM.H **********************
+

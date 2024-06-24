@@ -1,0 +1,1570 @@
+The WinT3000 Functional Specification
+=====================================
+
+
+Note:
+
+For a quick reference, especially during the development, we will name every
+interface-element used in the user-interface.
+Ex: Application main window identified by TF1
+    Interrupt transfer icon identified by TBInterrupt
+    Progress bar panel      identified by STProgress
+
+
+
+Contents:
+--------
+1. The application main window ( TF1 )
+
+  1.1  The title bar
+  1.2  The main menu component
+  1.3  The tool bar
+  1.4  The client area
+  1.5  The status bar
+
+2. The menu commands
+
+  2.1 The 'Miscellaneous' command
+        2.1.1  The 'Connection' command
+                 2.1.1.1 The Connect command
+                 2.1.1.2 The Disconnect command
+        2.1.2  The 'System list' command  ( TF20 )
+        2.1.3  The 'Panel status' command ( TF21 )
+        2.1.4  The 'Descriptors' command
+                 2.1.4.1  The 'Load descriptors network' command ( TF23 )
+                 2.1.4.2  The 'Load descriptors panel' command   ( TF24 )
+                 2.1.4.3  The 'View descriptors' command         ( TF25 )
+                 2.1.4.4  The 'Search descriptors' command       ( TF26 )
+        2.1.5  The 'File transfer' command
+                 2.1.5.1  The 'Copy File' command     ( TF27 )
+                 2.1.5.2  The 'Read File' command     ( TF28 , TF28.1 )
+                 2.1.5.3  The 'Send File' command     ( TF29 , TF29.1 )
+                 2.1.5.4  The 'Delete File' command   ( TF30 )
+                 2.1.5.5  The 'Rename File' command   ( TF31 )
+        2.1.6  The 'Update panel's OS' command        ( TF32 )
+        2.1.7  The 'Print' command                    ( TF33 )
+        2.1.8  The 'Print preview' command            ( TF34 )
+        2.1.9  The 'Printer setup' command            ( TF35 )
+        2.1.10 The 'Logout' command                   ( TF36 )
+        2.1.11 The 'Exit' command                     ( TF37 )
+  2.2 The 'Panel' command
+        2.2.1 The 'File' command
+                2.2.1.1 The 'Get' command             ( TF38 )
+                2.2.1.2 The 'Send' command            ( TF39 )
+                2.2.1.3 The 'Load' command            ( TF40 )
+                2.2.1.4 The 'Save' command            ( TF41 )
+        2.2.2 The 'Print panel' command               ( TF42 )
+        2.2.3 The 'Clear panel' command               ( TF43 )
+        2.2.4 The 'Select panel' command              ( TF44 )
+        2.2.5 The 'Network status' command            ( TF45 )
+        2.2.6 The 'Save network' command              ( TF46 )
+  2.3 The 'Control' command ( TF59, TF60, TF61, TF62 )
+        2.3.1 The 'Screens' command           ( TF50 )
+        2.3.2 The 'Programs' command          ( TF51 )
+        2.3.3 The 'Inputs' command            ( TF52 )
+        2.3.4 The 'Outputs' command           ( TF53 )
+        2.3.4 The 'Variables' command         ( TF54 )
+        2.3.5 The 'Controllers' command       ( TF55 )
+        2.3.6 The 'Weekly routines' command   ( TF56 )
+	            2.3.6.1 The Time Schedule     ( TF63 )
+        2.3.7 The 'Annual routines' command   ( TF57 )
+	            2.3.7.1 The Annual Schedule   ( TF64 )
+        2.3.8 The 'Arrays' command            ( TF58 )
+                2.3.8.1 The Array elements    ( TF65 )
+  2.4 The 'Data' command
+        2.4.1 The 'Monitors' command
+        2.4.2 The 'Tables' command
+        2.4.3 The 'Custom units' command
+        2.4.4 The 'Alarms log' command
+  2.5 The 'Configuration' command
+        2.5.1 The 'Set up' command
+        2.5.2 The 'Users list' command
+        2.5.3 The 'Hardware' command
+  2.6 The 'Help' command
+
+3. Working with windows
+
+  3.1 Worksheets
+  3.2 Screens
+  3.2 Graphs
+  3.3 Program editing windows
+  3.4 Other windows
+
+4. Hot keys
+
+5. Windows identifiers
+
+    TF1   application main window                 ( see 1.      )
+    TF20  'System list'                           ( see 2.1.2   )
+    TF21  'Panel status'                          ( see 2.1.3   )
+    TF23  'Descriptors'-Load Descriptors Network  ( see 2.1.4.1 )
+    TF24  'Descriptors'-Load Descriptors Panel    ( see 2.1.4.2 )
+    TF25  'Descriptors'-View Descriptors          ( see 2.1.4.3 )
+    TF26  'Descriptors'-Search Descriptors        ( see 2.1.4.4 )
+    TF27  'File transfer'-Copy file               ( see 2.1.5.1 )
+    TF28  'File transfer'-Read file               ( see 2.1.5.2 )
+    TF28.1 'File transfer'-Read file               ( see 2.1.5.2 )
+    TF29   'File transfer'-Send file               ( see 2.1.5.3 )
+    TF29.1 'File transfer'-Send file               ( see 2.1.5.3 )
+    TF30  'File transfer'-Delete file             ( see 2.1.5.4 )
+    TF31  'File transfer'-Rename file             ( see 2.1.5.5 )
+    TF32  'Update panel's OS'                     ( see 2.1.6   )
+    TF33  'Print'                                 ( see 2.1.7   )
+    TF34  'Print preview'                         ( see 2.1.8   )
+    TF35  'Printer setup'                         ( see 2.1.9   )
+    TF38  'Get' command                           ( see 2.2.1.1 )
+    TF39  'Send' command                          ( see 2.2.1.2 )
+    TF40  'Load' command                          ( see 2.2.1.3 )
+    TF41  'Save' command                          ( see 2.2.1.4 )
+    TF42  'Print panel' command                   ( see 2.2.2   )
+    TF43  'The 'Clear panel' command              ( see 2.2.3   )
+    TF44  'Select panel' command                  ( see 2.2.4   )
+    TF45  'Network status' command                ( see 2.2.5   )
+    TF46  'Save network' command                  ( see 2.2.6   )
+
+
+    TF50  'Screens'                               ( see 2.3.1   )
+    TF51  'Programs'                              ( see 2.3.2   )
+    TF52  'Inputs'                                ( see 2.3.3   )
+    TF53  'Outputs'                               ( see 2.3.4   )
+    TF54  'Variables'                             ( see 2.3.5   )
+    TF55  'Controllers'                           ( see 2.3.6   )
+    TF56  'Weekly routines'                       ( see 2.3.7   )
+    TF57  'Annual routines'                       ( see 2.3.8   )
+    TF58  'Arrays'                                ( see 2.3.9   )
+    TF59  Refresh                                 ( see 2.3     )
+    TF60  Font                                    ( see 2.3     )
+    TF61  Color                                   ( see 2.3     )
+    TF62  Range                                   ( see 2.3     )
+	TF63  Time Schedule                           ( see 2.3.6.1 )
+	TF64  Annual Schedule                         ( see 2.3.6.2 )
+    TF65  Array elements                          ( see 2.3.8.1 )
+
+
+
+1. Application main window ( TF1 )
+--------------------------------
+
+	The application main window has five components:
+             title bar component
+    		 main menu component
+             tool bar component
+             client area component
+             status bar component
+
+1.1 The title bar component
+---------------------------
+
+	The title bar contains the text that appears in the window title.
+
+
+1.2 The main menu component
+---------------------------
+
+	The main menu component encapsulates a menu bar and its accompanying
+drop-down menus. A menu item can have assigned an accelerator key or a
+keyboard shortcut. The accelerator key let the user access the menu item
+from the keyboard by pressing Alt+ the appropriate letter. The accelerator key
+appears underlined in the menu. The keyboard shortcut let the user perform
+the menu item action without accessing the menu directly, by typing the shortcut
+key combination. The keyboard shortcut applies to drop-down list and it
+appears to the right of the menu item name.
+The menu items can be in an enabled or in a disabled state. If a menu item is in
+an enable state, the user can select that menu item. If a menu item is in a
+disable state , the menu item is hidden (grayed out) and the user cannot select it.
+	The menu bar items are:
+
+				 1. Miscellaneous
+                 2. Panel
+                 3. Control
+                 4. Data
+                 5. Configuration
+                 6. Help
+
+We will refer a menu item also as a menu command.
+
+
+1.3 The tool bar component
+
+	The tool bar consists of several objects ( buttons, icons or text
+displayed ) that provide shortcuts for menu commands. When the mouse moves above
+the tool bar objects, a short text will describe the object action. The tool bar
+object can be in an enable or in a disable state. The WinT3000 tool bar objects
+are:
+               Connect button             ( TBConnect    )
+               Disconnect button          ( TBDisconnect )
+               Select panel button        ( TBSelect     )
+               Send program button        ( TBSend       )
+               Get program button         ( TBGet        )
+               Graph button               ( TBGraph      )
+               Panel configuration button ( TBConfig     )
+               Help button                ( TBHelp       )
+               Connect status window      ( TBConStatus  )
+               Alarm button               ( TBAlarm      )
+               Interrupt transfer icon    ( TBInterrupt  )
+
+The names in parentheses are the names we will use in documentation to refer to
+the appropriate object.
+
+The 'Connect button' is a shortcut for the menu command:
+             Miscellaneous->Connection->Connect
+The 'Disconnect button' is a shortcut for the menu command:
+             Miscellaneous->Connection->Disconnect
+The 'Select panel button' is a shortcut for the menu command:
+             Panel->Select panel
+The 'Send program button' is a shortcut for the menu command:
+             Panel->File->Send
+The 'Get button' is a shortcut for the menu command:
+             Panel->File->Get
+The 'Graph button' is a shortcut for the menu command:
+             Data->Monitors
+The 'Panel configuration button' is a shortcut for the menu command:
+             Configuration->Hardware->Panel configuration
+The 'Help button' is a shortcut for the menu command:
+             Help->Contents
+The 'Alarm button' is a shortcut for the menu command:
+             Data->Alarms log
+The 'Connect status window' displays the name of the remote panel and is a
+shortcut for the menu command:
+             Miscellaneous->Panel status
+
+The 'Alarm button' is a shortcut for the alarms log but at the same time informs
+the user about the alarm status. If there is no alarm in the system this icon
+has a grey color. If there is at least one alarm in the system the icon is
+displayed in a red color and a sound could be played at about 30 seconds interval.
+The 'Interrupt transfer icon' shows if there is a data transfer between the
+user station and the remote panel. When the user click on this object the
+current data transfer will be interrupted.
+
+
+
+1.4  The client area component
+------------------------------
+
+    The client area is the area in the middle of the application main window
+between the tool bar and status bar used by the as the working area.
+
+
+1.5  The status bar component
+-----------------------------
+
+	The status bar is a row of objects (panels), aligned at the bottom of the
+form, that display information about the application as it runs.
+The WinT3000 status bar objects are:
+
+               Progress bar panel  ( STProgress )
+               Message panel       ( STMessage  )
+               Caps lock panel     ( STCaps     )
+               Time panel          ( STTime     )
+               System name         ( STSystem   )
+
+The names in the parentheses are the names we will use in documentation to refer
+to the appropriate panel.
+
+The 'Progress bar' panel tracks the progress of a data transfer within an
+application. As the data transfer progresses, the progress bar rectangular
+gradually fills from left to right.
+The 'Message' panel informs the user about the application status.
+The 'Caps lock' panel shows the Caps Lock status of the keyboard.
+The 'Time' panel shows the system time. The application will update this panel
+at every minute for now (we can update it at every second).
+The 'System name' panel shows the system name the user is connected.
+
+
+
+2. The menu commands
+--------------------
+
+2.1 The 'Miscellaneous' command
+-------------------------------
+
+	The accelerator key combination is Alt+M. When this menu bar item is
+selected the next drop-down list is opened:
+
+                 1. Connection
+                 2. System list
+                 3. Panel status
+                 4. Descriptors
+                 5. File transfer
+                 6. Update panel's OS
+                 7. Print
+                 8. Print preview
+                 9. Print setup
+                10. Logout
+                11. Exit
+
+2.1.1 The 'Connection' command
+
+	When this menu command is selected, the next drop-down list is open:
+                  Connect
+                  Disconnect
+
+2.1.1.1 The 'Connect' command.
+
+	The WinT3000 uses the PC's COM ports to establish a connection to a remote
+control panel (T3000 panel or mini panel). The COM ports can be configured
+either as a serial port or as a modem port.
+The application can configure the COM ports ( COM1 to COM4 ) using the menu
+command Configuration->Hardware->COMM Settings (TF4 window).
+Upon selection of this menu command one of the next situations can happen:
+
+1. If there is no port configured, an error message will be displayed in an
+error window and a sound will be played. The error window has an OK button. The
+application waits for the user to respond to the message. The user can press
+ESC key or select the OK button to close the window.
+
+2. If there is only one port, configured as a serial port the application will
+try to establish the connection on that port.
+
+3. If there is only one port, configured as a modem port the application will
+ask the user to select a system name from a system list and then will try to
+establish the connection on that port. After the connecttion is established
+the system name is displayed in the 'System name' panel in the status bar.
+
+4. If there is more then one port configured, the third drop-down list will be
+opened and the user has to select the COM port on which the connection should
+be established. The drop-down list will be:
+
+                  COM1 Text
+                  COM2 Text
+                  COM3 Text
+                  COM4 Text
+
+where 'Text' can be: 'Modem' or 'Serial'. If one COM port is not configured,
+the corresponding line will be disabled.
+Ex. Let say COM1 is configured as 'Serial', COM3 as 'Modem' and COM2,COM4
+are not configured. The drop-down list will be:
+
+                   COM1 Serial
+                   COM2           - this line will be disabled
+                   COM3 Modem
+                   COM4           - this line will be disabled
+
+In this last case, if the 'Connect' command was activated using the
+'Connect button' from the status bar, a pop-up menu will be used to reflect
+exactly the above description.
+
+After the selection was made the application tries to establish the connection
+and the message 'Try to establish connection on COMx' will appear in the
+'Message' panel of the status bar. If the connection can be established, the user
+has to wait until the application set up the connection. After the connection
+was set up, the application will read the descriptors for every control panel
+connected on the same network with the remote control panel to which the user
+is direct connected. If the connection was established, a sound will be played,
+the message 'Connected to <panel name>' will appear in the 'Message' panel of
+the status bar and the panel name to which the user is connected will be
+displayed in the 'Connect status' window (on the right side of the tool bar).
+If the the connecttion was established over a modem port the system name is
+displayed in the 'System name' panel in the status bar.
+
+Now, any request will be directed to the remote control panel to which the user
+is connected.
+If the connection cannot establish in 30 seconds a sound is played,
+the message 'Disconnected' will appear in the 'Message' panel of the status bar
+and in the 'Connect status' window.
+At any time the user can interrupt the actual transfer between the user station
+and the remote panel by clicking on the 'Interrupt transfer' icon
+(on the right side of the tool bar).
+
+
+2.1.1.1 The 'Disconnect' command.
+
+	The current connection will be broken and the WinT3000 will disconnect
+from the remote control panel.
+
+
+2.1.2 The 'System list' command ( TF20 window )
+
+
+  The system list worksheet contains the names of the installations that can be
+accessed through WinT3000 and parameters that are used to access a remote system.
+The application asks the user to select a system name from the system list and
+then will look for a modem port. One of next two situations can happen:
+ 1. If there is only one modem port configured, the application tries to establish
+the connection on that port.
+ 2. If there is more then one port configured as a modem, the application will
+ask the user to select the modem port on which the connection should be
+established.
+
+After the selection was made the application will do the same actions describe
+in 'Connect' command (2.1.1.1).
+
+The fields defined in the system list worksheet are:
+      System Name  - the name of the a remote system
+      Phone Number - the phone number the modem will dial to reach the remote
+                     system.
+      Directory	   - the path directory for this system. The information that
+                     need to be saved on the user station related to this job
+                     will be saved in this directory.
+The system list window (TF20) has attached a menu bar defined as follow:
+
+       Close  Edit  Connect  Print  Options
+              ----                  -------
+              Undo                  Font
+              Cut                   Colors
+              Copy
+              Paste
+              Delete
+
+where:
+       Close   - close the window and saves any changes
+       Edit    (see 2.3)
+       Connect - initiate the connection process to the currently selected system.
+                 As alternative, you can also press the 'Insert' key on the
+                 selected system.
+       Print   - prints the system list worksheet
+       Options (see 2.3)
+
+
+2.1.3 The 'Panel status' command ( TF21 window )
+
+	Displays information regarding to the panel status the user is connected and
+the communication status of that panel:
+                panel number
+                panel name
+                panel type (T3000 or mini)
+                software version (T3000 and mini)
+                program file name (.prg)
+                imported network points - indicates the number of network points
+                             that are imported into the panel from other panels.
+                             When select this button a list of all the imported
+                             network points will be displayed
+                exported network points - indicates the number of points being
+                             exporting from the panel. When select this button a
+                             list of all the exported network points will be
+                             displayed
+                notes button - when selected will open a file text (memo file)
+                               attached to the panel
+                ports status: which port are installed, what kind of connection,
+                              and if they are connected or not
+
+	This window is also opend when the user click on the Connect status window
+( TBConStatus  ).
+
+
+2.1.4 The 'Descriptors' command
+
+	Descriptors consist of a label name and a description for every point in the
+panel and for every panel on the network. These items are loaded into the PC
+memory when the user sign-on. The Descriptors command facilitates the manipulation
+of descriptors:
+
+    Load Descriptors Network ( TF23 ) -	loads descriptors from all the panels on
+                                        the network.
+    Load Descriptors Panel   ( TF24 ) - loads the descriptors from the current
+                                        panel
+    View Descriptors ( TF25 )- provides an interface to all of the descriptors
+                 in a system. This allows the user to select and view descriptors
+                 from any panel on the network. A pull down menu allows to select
+                 a panel and then the current panel's descriptors will be
+                 displayed. This mean that for every point will be displayed its
+                 description and its label.
+                 The view descriptors window (TF25) consists of:
+                    1. a line of buttons on the first line that contains:
+                         - a Close button
+                         - a pull down list that lists the panel numbers and
+                           their name. The user will select one panel
+                         - a Preview panel button ( << )
+                         - a Next panel button    ( >> )
+                         - a Print button
+                         - a Print All button
+                    2. a worksheet that has defined next fields:
+                         - Point type (Output, Input, etc)
+                         - Point definition ( 1OUT10, 3PRG2, etc)
+                         - Description - point description
+                         - Label       - point label
+    Search Descriptors ( TF26 ) - allow to identify to which panel belongs a
+                                  label, the point type and the point number.
+                                  The user types the label and the application
+                                  identify it and returns its description
+                                  (panel number, point type, point number)
+
+
+2.1.5 The 'File transfer' command
+
+	Allows file managing on the connected panel and transfers files between the user
+station and a remote T3000 control panel. The user can select one of the next
+operations:
+           Copy file (TF27)   - copy a file on the connected panel
+           Read file (TF28)   - copy a file from the remote panel to the user
+                                station. If the user station is not connected to
+                                a remote panel, this command is disabled.
+           Send file (TF29)   - copy a file from the user station to the remote
+                                panel. If the user station is not connected to a
+                                remote panel, this command is disabled.
+           Delete file (TF30) - delete a file on the connected panel
+           Rename file (TF31) - rename a file on the connected panel
+
+All these commands should operate dialog windows that allow the use to select
+the drive, directory, and file name.
+When a file is selected, the file length have to be displayed.
+
+For the Read and Send file operations, we will create a thread, that will allow
+the user to do something else while the operations are in progress.
+
+For the Read file operation, after the user select the remote and the local file,
+the next window (TF28.1) will open:
+
+-------------------------------------------------------------------------------------------------
+|  Read file from a remote panel                   |                                            |
+-------------------------------------------------------------------------------------------------
+|                                                                                               |
+|  Remote source file     :  file name and path                                                 |
+|  Local destination file :  file name and path                                                 |
+|                                                                                               |
+|  Status                 :  'no_of_Kbyte_already_transferred'K  of 'file_length_in_Kbytes'K    |
+|  Estimated time left    :  hh:mm:ss                                                           |
+|                                                                                               |
+|  ------------------------------------------                                                   |
+|  |  progress bar                          |  nn %                                              |
+|  ------------------------------------------                                                   |
+|                                                                                               |
+|                    --------------                                                             |
+|                    |   Cancel   |                                                             |
+|                    --------------                                                             |
+|                                                                                               |
+|------------------------------------------------------------------------------------------------
+
+
+For the Send file operation, after the user select the remote and the local file,
+the next window (TF29.1) will open:
+
+------------------------------------------------------------------------------------------------
+|  Send file to a remote panel                    |                                            |
+------------------------------------------------------------------------------------------------
+|                                                                                               |
+|  Remote destination file :  file name and path                                                |
+|  Local source file       :  file name and path                                                |
+|                                                                                               |
+|  Status                 :  'no_of_Kbyte_already_transferred'K  of 'file_length_in_Kbytes'K    |
+|  Estimated time left    :  hh:mm:ss                                                           |
+|                                                                                               |
+|  ------------------------------------------                                                   |
+|  |  progress bar                          |  nn %                                             |
+|  ------------------------------------------                                                   |
+|                                                                                               |
+|                    --------------                                                             |
+|                    |   Cancel   |                                                             |
+|                    --------------                                                             |
+|                                                                                               |
+|------------------------------------------------------------------------------------------------
+
+Any time, the file transfer can be interrupted by clicking on the Cancel button.
+
+If the connected panel is a mini panel the "File transfer' command is disabled.
+
+
+2.1.6 The 'Update panel's OS' command (TF32)
+
+	This command is used to update the firmware version of the EPROM installed
+on the mini panel. The application asks the user for the file name that
+contains the update software.
+If the connected panel is a T3000 control panel this command is disabled.
+
+
+2.1.7  The 'Print' command (TF33)
+
+    Print allows the user to print information to the selected printer in a
+worksheet format.
+
+
+
+2.1.8  The 'Print preview' command (TF34)
+
+   'Print Preview' displays a preview of the print item as it will appear on
+paper.
+
+
+2.1.9  The 'Printer setup' command (TF35)
+
+   The printer setup option displays the standard Windows printer setup.
+
+
+2.1.10 The 'Logout' command
+
+    The user logout without to exit the application. The user should login before
+to can do any other action.
+
+
+2.1.11 The 'Exit' command
+
+    'Exit' closes the current session of WinT3000 that is running and disconnects
+communications if the user is online.
+
+
+2.2 The 'Panel' command
+-----------------------
+
+    The 'Panel' command contains items that allow the user to access panel
+properties. The accelerator key combination is Alt+P. When this menu bar item is
+selected the next drop-down list is opened:
+
+                 1. File
+                 2. Print panel
+                 3. Clear panel
+                 4. Select panel
+                 5. Network status
+                 6. Save network
+
+2.2.1 The 'File' command
+------------------------
+
+	This command allows the user to manipulate the control panel program file.
+The user can select one of the next functions:
+
+                 1. Get
+                 2. Send
+                 3. Load
+                 4. Save
+
+All these commands should operate dialog windows that allow the use to select
+the drive, directory, and file name.
+The progress of file transfer have to be reflected in the STProgress panel and
+TBInterrupt icon.
+Any time, the file transfer can be interrupted by clicking on the TBInterrupt
+icon.
+
+
+2.2.1.1 Get ( TF38 )
+-------------------
+
+	This command reads the remote control panel memory ( T3000 or mini ) and
+save the date in a program file ( .prg) on the external media attached to the
+user station (harddisk, floppy disk). The file will be saved with the extension
+".prg". The data are read directly from the control panel memory. When this
+function is selected an Get dialog window will open to ask the user for a drive,
+path and file name. The default file name displayed in the Get dialog file name
+will be the 'Default program' of the remote panel. If this window exits with a
+valid file name, the applicatiom will ask the user to confirm the operation:
+
+      --------------------------------------
+      |                                    |
+      |     Save panel nn as 'filename'?   |
+      |                                    |
+      |                                    |
+      |         OK           Cancel        |
+      |                                    |
+      --------------------------------------
+
+If the user select OK, the application checks if that file already exists. If the
+file exists, the old file will be renamed as 'filename.pr_' and the application
+proceed with the transfer.
+The operation will be considered succesfully finished when all the objects where
+saved.
+The first transmission error that cannot be recovered will finished the operation,
+the 'filename.pr_' will be copied as 'filename.prg', an error message will be
+displayed in an error window and a sound will be played.
+
+In the STMessage panel will be displayed the current point type that is saved.
+Any time, the file transfer can be interrupted by clicking on the TBInterrupt
+icon.
+
+If the user is not connected to a remote panel, this command is disabled.
+
+2.2.1.2 Send ( TF39 )
+---------------------
+
+	This command loads a program file ( .prg file ) from the user station (hard
+disk, floppy disk) to a remote control panel ( T3000 or mini ) memory. The data
+are send directly to the control panel memory. When this function is selected
+an Send dialog window will open to ask the user for a drive, path and file name.
+The default file name displayed in the Send dialog file name will be the
+Default program' of the remote panel. If this window exits with a valid file name,
+the applicatiom will ask the user to confirm the operation:
+
+      -------------------------------------------------
+      |                                               |
+      |     Send program 'filename'  to  panel nn ?   |
+      |                                               |
+      |                                               |
+      |         OK            Cancel                  |
+      |                                               |
+      -------------------------------------------------
+
+If the user select OK, the application checks if that file exists. If the file
+exists, the application proceed with the transfer.
+The operation will be considered succesfully finished when all the objects where
+sent.
+The first transmission error that cannot be recovered will finished the operation,
+an error message will be displayed in an error window and a sound will be played.
+
+Note: The objects are sent one by one. So, in case of error, the objects that
+where sent are already stored in the remote control panel memory.
+
+The new program file that is sended will become the 'Default program' of that
+panel.
+
+In the STMessage panel will be displayed the current point type that is saved.
+Any time, the file transfer can be interrupted by clicking on the TBInterrupt
+icon.
+
+If the user is not connected to a remote panel, this command is disabled.
+
+
+2.2.1.3 Load ( TF40 )
+---------------------
+
+	This command loads a program file ( .prg file ) from the external media
+attached to a control panel (hard disk, floppy disk) to the control panel memory.
+When this function is selected an Load dialog window will open to ask the user
+for a drive, path and file name. The default file name displayed in the Load
+dialog file name will be the 'Default program' of the remote panel.
+If this window exits with a valid file name, the applicatiom will ask the user to
+confirm the operation:
+
+      -------------------------------------------------
+      |                                                |
+      |     Load program 'filename' to  panel  nn ?    |
+      |                                                |
+      |                                                |
+      |              OK           Cancel               |
+      |                                                |
+      --------------------------------------------------
+
+If the user select OK, the application send the file name to the remote control
+panel that will proceed with the loading operation.
+
+The new program file that is loaded will become the 'Default program' of that
+panel.
+
+Note: The drive path, and file names that are displayed in this window are read
+from the remote control panel.
+
+If the connected panel is a mini panel the "Load' command is disabled.
+
+
+2.2.1.4 Save ( TF41 )
+---------------------
+
+	This command saves the control panel memory to a program file ( .prg file )
+on the attached external media (harddisk, floppy disk, flash memory).
+
+1. For a T3000 control panel
+
+	This command saves the control panel memory to a program file ( .prg file )
+on the attached external media (harddisk, floppy disk). The file will be saved
+with the extension ".prg". When this function is selected an Save dialog window
+will open to ask the user for a drive, path and file name. The default file name
+displayed in the Save dialog file name will be the 'Default program' of the
+remote  panel. If this window exits with a valid file name, the applicatiom will
+ask the user to confirm the operation:
+
+      -----------------------------------------
+      |                                       |
+      |     Save panel nn  as 'filename'?     |
+      |                                       |
+      |                                       |
+      |         OK            Cancel          |
+      |                                       |
+      -----------------------------------------
+
+If the user select OK, the application send the file name to the remote control
+panel that will proceed with the saving operation.
+
+
+2. For a mini control panel
+
+    This command saves the control panel memory to its flash memory, the program
+file name is not relevant. The applicatiom will ask the user to confirm the
+operation.
+
+      --------------------------------------
+      |                                    |
+      |     Save panel nn as 'filename'?   |
+      |                                    |
+      |                                    |
+      |         OK           Cancel        |
+      |                                    |
+      --------------------------------------
+
+If the user select OK, the remote mini panel will proceed with the operation.
+
+
+2.2.3 The 'Clear panel' command ( TF43 )
+----------------------------------------
+
+     An window will open and will ask the user to confirm the clear action.
+If the user confirm the panel will be cleared.
+
+
+2.2.4 The 'Select panel' command ( TF44 )
+-----------------------------------------
+
+	This command allows the user to select a panel after a connection was
+established. All the requests will be directed to this panel, except those that
+specify a action from another panel. (Ex 5IN1 , will read input1 from panel 5).
+When the user establish a connection, the selected panel is the remote panel that
+established the connection with the user station.
+During a session, the user can a different panel that is reachable trough the
+connection. The TF44 has the layout:
+
+
+   -------------------------------------------------------------------
+   |   Select panel                                                  |
+   -------------------------------------------------------------------
+   |                                                                 |
+   |   Network no.:      Network name       Panel            |
+   |   ------------      -------------     ----------------------    |
+   |   |          |      |           |     |                    |    |
+   |   ------------      -------------     ----------------------    |
+   |                                                                 |
+   |                                                                 |
+   |           ---------------        -----------------              |                                |
+   |           |    OK       |        |  Cancel       |              |                   |
+   |           ---------------        -----------------              |                                |
+   |                                                                 |
+   -------------------------------------------------------------------|
+
+where;
+
+  Network no.    - the selected network number
+  Network name   - the selected network name ( a description of network)
+  Panel          - the selected panel
+
+All objects are drop-down list. Related to network, the user can select a
+network number ( the application will update the network name ) or a network
+name ( the application will update the network number ).
+The 'Panel' drop-down list will list all the panel that are 'ON' on
+the selected network in the format:
+               panel_number  panel_name
+The panel will be displayed in an ascending order of panel number
+
+
+2.2.5 The 'Network status' command ( TF45 )
+------------------------------------------
+
+	The Network status gives the status of all panels on a network. The data
+are display in a worksheet format, one entry for every panel connected to the
+network.
+The worksheet has the following fields:
+
+                panel number
+                panel name
+                panel type (T3000 or mini)
+                software version (T3000 and mini)
+                program file name (.prg)
+                imported network points - indicates the number of network points
+                             that are imported into the panel from other panels.
+                             When select this button a list of all the imported
+                             network points will be displayed
+                exported network points - indicates the number of points being
+                             exporting from the panel. When select this button a
+                             list of all the exported network points will be
+                             displayed
+                notes button - when selected will open a file text (memo file)
+                               attached to the panel
+                ports status: which port are installed, what kind of connection,
+                              and if they are connected or not
+
+The 'Network status' window ( TF45 )has attached a menu bar defined as follow:
+
+       Close  Print  Note  Options
+                           -------
+                             Font
+                             Colors
+
+where:
+        Close   - close the window and saves any changes
+        Print   - prints the system list worksheet
+        Note    - read the note attached to the panel currently selected panel
+        Options (see 2.3)
+
+
+2.2.6 The 'Save network' command ( TF46 )
+-----------------------------------------
+
+
+
+
+2.3 The 'Control' command
+-------------------------
+
+    The 'Control' command allows the user to access the panel objects (inputs,
+outputs, etc.). The accelerator key combination is Alt+C. When this menu bar item
+is selected the next drop-down list is opened:
+
+                1 Screens          ( TF50 )
+                2 Programs         ( TF51 )
+                3 Inputs           ( TF52 )
+                4 Outputs          ( TF53 )
+                5 Variables        ( TF54 )
+                6 Controllers      ( TF55 )
+                7 Weekly routines  ( TF56 )
+                8 Annual routines  ( TF57 )
+                9 Arrays           ( TF58 )
+
+When one of the above command is selected the appropiate window will open.
+All the windows define for the above commands have:
+
+     1. title bar  - the title bar text consists of the panel name and point type
+                     ( Ex: Panel1 - Inputs for 'Inputs' command )
+
+     2. bar menu  - the menu bar has the following skeleton:
+
+				            Close   Edit  Print   Options
+                                    ----          -------
+                                    Undo          Refresh
+                                    Cut           Show Object
+                                    Copy          Font
+                                    Paste         Color
+                                    Delete
+                   where:
+                        Close   - close the window and saves any changes
+                        Edit    - offers the editing features.
+							Undo	reverses the last editing action that was
+                                    performed  ( Alt + BkSp )
+                            Cut     cuts items in worksheet ( Shift + Delete )
+                            Copy	makes a duplicate of the selected item in
+                                    worksheet (	Ctrl + Insert )
+                            Paste	re-inserts the item that have been cut or
+                                    copied ( Shift + Insert )
+                            Delete  deletes items in worksheet ( Ctrl + Delete )
+                        Print   - produces a printed copy of the current window
+                        Options - has the following commands:
+                            Refresh (TF59) - when a worksheet is viewed the
+                                  application updates the data from the panel at
+                                  user specified intervals.  This refresh rate
+                                  interval has a default value ( 10 seconds ) but
+                                  the user can set a refresh value for every
+                                  worksheet viewed.
+                            Show Object - shows the content of the current
+                                  selected object. It applies to screens, programs,
+                                  weekly routines, annual routines, arrays, tables,
+                                  monitors. All the other object have this option
+                                  disabled. As alternative, the user can also
+                                  press the 'Insert' key on the current selected
+                                  object.
+                            Font (TF60) - allows the use to customize the font
+                                          of the worksheet
+                            Color (TF61)- allows the user to customize the color
+                                          for the text displayed in the worksheet
+                                          (foreground) and the background of the
+                                          worksheet
+                            For the Refresh, Font, and Color there are two options:
+                            to apply the new setting only to that worksheet or to
+                            apply the setting to all the worksheets opened
+                            afterward. There should be also an option that allows
+                            to restore the factory defaults.
+
+     3. worksheet  - displays the objects (points) properties in a tabular form.
+                     The rows of the table represent the objects and the columns
+                     represent the object properties. The user can navigate thru
+                     the table using the navigators (scroll bars or arrow keys)
+                     to view or edit the objects properties.
+
+     4. popup menu - this menu is displayed any time the user clicks the right
+                  mouse button anywhere on the worksheet. The popup menu commands
+                  are:
+                          Close
+                          Show Object
+                          Undo
+                          Cut
+                          Copy
+                          Paste
+                          Delete
+                          Options
+                  All commands have the same action as describe above.
+
+The windows can be either modal or modeless. When a window runs modally, the user
+must explicitly close it before working in another running window. When a running
+window is modeless, it can remain onscreen while the user works in another window
+(for example, the application main form).
+All the windows opened with the above commands are modeless. This means the user
+can open many windows at the same time. The user can navigate thru the windows
+and can minimize them. Minimize shrinks an window and the window appears in its
+minimized state ( an icon ).
+When there is more then one window open, only one can have the focus.
+Related to the update, there are two posibilities:
+
+     1. only the window that has the focus has to update its worksheet at the
+specified refresh rate. In this case any time a window get focus its worksheet
+should be first updated.
+     2. all the opened windows have to update their worksheets, except the
+windows that are minimized. In this case any time a window get focus its
+worksheet is already updated. This version is usefull when we want to monitor
+different objects (inputs, outputs, etc.) at the same time. The only inconvenient
+is the time needed for updating all the windows.
+
+In both versions, we limit the number of opened windows at ten.
+
+'Range' field (TF62)
+-------------
+
+The field type of these worksheets can be Manual editing fields, Toggle value
+fields or Multiple selection fields (see 3.). Some of the worksheets have a
+special field of type Multiple selection field , named 'Range'. When such
+a field has to be edit a window (TF62) will open and the user can select a
+new range value. The layout of this window is:
+
+       1. one group box for the Analog ranges. This group has a ListBox control
+          that lists all the analog ranges. This list contain predefined
+          analog ranges, analog custom tables ( for inputs ), and analog custom
+          units ( for variables ). When one of the predefined items
+          is selected the Edit button is in a disable state. When one of the
+          analog custom items is selected ( Table1 to Table5 for inputs and
+          Custom1 to Custom8 for variables ) the Edit button is enable. If the
+          user click on the Edit button, the user can edit the currently selected
+          table ( The window TF? will open) or currently selected custom units
+          (TF?).
+          Also, the user can edit the item by clicking the right mouse button.
+
+       2. one group box for the Digital ranges. This group has the following
+          controls:
+               - a ListBox control that lists all the standard digital ranges.
+                 When this box is selected the Edit button is disabled.
+               - a ListBox control that lists all the custom digital ranges.
+                 When this box is selected the Edit button is enabled. The user
+                 can click on the Edit button to edit the currently selected
+                 custom item. Also, the user can edit the item by clicking the
+                 right mouse button.
+               - an Invert digital check box button. This button should be checked
+                 if the digital range has an inverted action. The button can
+                 be checked by clicking the left mouse button or by pressing
+                 space bar.
+       3 an Edit button. This button allow the user to edit the currently selected
+         analog custom table or custom digital item. The changes will be saved in
+         the analog table, respective the custom digital table in the system.
+       3. an OK button
+       4. an Cancel button
+An item from one of the lists is chosen by selecting one item and then clicking
+OK button, by double clicking the item, or by pressing enter on the selected
+item.
+Clicking the Cancel button close the window without to change the field
+value. Note: the changes the user did in any analog custom table or
+custom digital item remain in effect.
+
+NOTE: TO BE IMPLEMENTED:
+At this moment, the Custom Units for variable objects have no defined an
+underlying structure to represent them.
+
+     -------------------------------------------------------------------------
+     |                                                                       |
+     |  -- Digital ranges ---------------     -- Analog ranges -----------   |
+     |  |                               |     |                          |   |
+     |  |    Standard digital           |     |                          |   |
+     |  |    ---------------------      |     |   ---------------------  |   |
+     |  |    |                   |      |     |   |                   |  |   |
+     |  |    |                   |      |     |   |                   |  |   |
+     |  |    |                   |      |     |   |                   |  |   |
+     |  |    |                   |      |     |   |                   |  |   |
+     |  |    |                   |      |     |   |                   |  |   |
+     |  |    |                   |      |     |   |                   |  |   |
+     |  |    ---------------------      |     |   ---------------------  |   |
+     |  |                               |     |                          |   |
+     |  |                               |     |                          |   |
+     |  |    Custom digital             |     ----------------------------   |
+     |  |    ---------------------      |                                    |
+     |  |    |                   |      |       -----------------------      |
+     |  |    |                   |      |       |                     |      |
+     |  |    |                   |      |       |        Edit         |      |
+     |  |    |                   |      |       |                     |      |
+     |  |    |                   |      |       -----------------------      |
+     |  |    |                   |      |                                    |
+     |  |    ---------------------      |       -----------------------      |
+     |  |                               |       |                     |      |
+     |  |                               |       |         OK          |      |
+     |  |    ----                       |       |                     |      |
+     |  |    |  |  Invert digital       |       -----------------------      |
+     |  |    ----                       |                                    |
+     |  |                               |       -----------------------      |
+     |  |                               |       |                     |      |
+     |  |                               |       |       Cancel        |      |
+     |  |                               |       |                     |      |
+     |  ---------------------------------       -----------------------      |
+     |                                                                       |
+     -------------------------------------------------------------------------
+
+
+
+2.3.3 Inputs ( TF52 )
+---------------------
+
+	Inputs can be digital, being either on or off, or analog, having a number of
+possible values.
+Inputs are objects displayed in a worksheet. The object properties are:
+
+Description  a 20 character description
+
+Auto/Man	 it is a Toggle Value Field with two states: Auto and Manual. It
+             indicates whether the input is in auto or manual mode. In auto mode,
+             the input measures the value or state of an input device. In manual
+             mode, the value or state of the input is overridden by the value
+             shown in the value column. In memory, a value of zero means auto
+             mode and a value of 1 means manual mode
+
+Value	     displays the state or value of an input
+
+Units        the engineering units of the the input value. This field is related
+             to the range value
+
+Range	     sets the range of an input. The select range dialogue appears when
+             this field is clicked or the ENTER key is pressed (the window
+             TF62 will open). The user can choose one of the predefined ranges.
+             For a digital range, the left state in the digital range is mapped
+             to a value of zero ( flase )and the rigth state to a value of
+             one (true ).
+
+             The analog ranges for input objects are:
+
+                   predefined ranges
+             			 1.  Y3K -40 to 150 Deg.C
+						 2.  Y3K -40 to 300 Deg.F
+						 3.  10K -40 to 120 Deg.C
+						 4.  10K -40 to 250 Deg.F
+						 5.  G3K -40 to 120 Deg.C
+						 6.  G3K -40 to 250 Deg.F
+						 7.  KM10K -40 to 120 Deg.C
+						 8.  KM10K -40 to 250 Deg.F
+						 9.  A10K -50 to 110 Deg.C
+                         10. A10K -60 to 200 Deg.F
+                         11. 0.0 to 5.0 Volts
+                         12. 0.0 to 100  Amps
+                         13. 0.0 to 20  ma
+                         14. 0.0 to  20  psi
+                         15. 0.0 to  2^22 counts
+                         16. 0.0 to 3000 FPM
+                         17. 0 to 100  %(0-5V)
+                         18. 0 to 100  %(4-20ma)
+                         19. Pulses/min"
+                   analog custom tables
+                         20. Table 1
+                         21. Table 2
+                         22. Table 3
+                         23. Table 4
+                         24. Table 5
+                         25. Unused  "
+
+             The standard digital ranges are:
+
+						 1 Off/On
+                         2 Close/Open
+                         3 Stop/Start
+                         4 Dis/Enable
+						 5 Norm/Alarm
+                         6 Norm/High
+                         7 Norm/Low
+                         8 No/Yes
+						 9 Cool/Heat
+                         10 Un/Occupied
+                         11 Low/High
+
+             The custom digital ranges are:
+
+						 23.  OffCustom1 / OnCustom1
+                         24.  OffCustom2 / OnCustom2
+						 25.  OffCustom3 / OnCustom3
+                         26.  OffCustom4 / OnCustom4
+						 27.  OffCustom5 / OnCustom5
+                         28.  OffCustom6 / OnCustom6
+						 29.  OffCustom7 / OnCustom7
+                         30.  OffCustom8 / OnCustom8
+
+             The range value influences the behavior of 'Value' and 'Unit' fields.
+             When this field changes its value the 'Value' and 'Unit' fields
+             should be updated to reflect that change.
+
+Cal    	     is a calibration adjustment added to an analogue point (to compensate
+             for wire resistance and sensor inaccuracy). For analog ranges number
+             2, 4, 6, 8, 10, 15, 16, and 19 the allowed calibration value is
+             between -255 and 255 and only in whole numbers. For all other analog
+             ranges the allowed calibration value is between -25.5 and 25.5, with
+             one decimal point increments possible.
+
+Filter	    is the number of measurements that are averaged to produce the value
+            displayed in an analogue input field. Averaging measurements helps
+            to filter out undesirable fluctuations at the input.
+            It is a Toggle Value Field with the next posible values:
+                          1, 2, 4, 8, 16, 32, 64, 128.
+            In memory these values are reprezented by 0, 1, 2, 3, 4, ,5 ,6, 7
+
+D           decommissioned flag. It is a Toggle Value Field with two states:
+            "-" and "Y"
+
+Label	    an 8 character label name
+
+
+2.3.4 Outputs ( TF53 )
+----------------------
+
+	Outputs can be digital or analogue. The outputs  worksheet contains the
+following fields:
+
+Description  a 20 character description
+
+Auto/Man	 it is a Toggle Value Field with two states: Auto and Manual. It
+             indicates whether the output is in auto or manual mode. In auto mode,
+             the output takes a value or state assigned to it from a Control
+             Basic program. In manual mode, the value or state of the output is
+             overridden by the value shown in the value column. In memory,
+             a value of zero means auto mode and a value of 1 means manual mode
+             For the output card the on board Auto/Off/Manual switches govern
+             the final condition of the output. If a switch is in Manual or Off
+             position, the software settings will be ignored.
+
+Value	     displays the state or value of an output.
+
+Units        the engineering units of the the output value. This field is related
+             to the range value
+
+Range        has the same semnification as describe in 2.3.3 Inputs
+
+             The analog ranges for output objects are:
+
+                         0. Unused
+						 1. 0.0 to 10.0  Volts
+						 2. 0.0 to 100   %Open
+						 3. 0.0 to 20    psi
+						 4. 0.0 to 100   %
+                         5. 0.0 to 100   %Close
+                         6. 0.0 to 20    ma
+
+             The digital ranges are the same as describe in 2.3.3 Inputs
+
+0%	         this is the voltage generated to the analog output when the output
+             is at the 0% condition. Does not apply to the digital outputs.
+
+100%         this is the voltage generated to the analog output when the output
+             is at the 100% condition. Does not apply to the digital outputs.
+
+D            decommissioned flag. It is a Toggle Value Field with two states:
+              "-" and "Y"
+
+Label	     an 8 character label name.
+
+
+2.3.4 Variables ( TF54 )
+------------------------
+
+	Inputs and outputs are real objects (points) that are wired to controllers.
+All other objects are virtual objects. The variables are one of such objects.
+Variables are used in Control Basic programs and they can hold setpoints,
+minimum, maximum, and average values, counters, flags, etc.
+The variables worksheet contains the following fields:
+
+Description  a 20 character description
+
+Auto/Man	 it is a Toggle Value Field with two states: Auto and Manual. It
+             indicates whether the variable is in auto or manual mode. In auto mode,
+             the variable takes a value or state assigned to it from a Control
+             Basic program. In manual mode, the value or state of the output is
+             overridden by the value shown in the Value column. In memory,
+             a value of zero means auto mode and a value of 1 means manual mode
+
+Value	     the value assigned to the variable. For a digital range, the left
+             state in the digital range is zero (flase)and the rigth is one (true).
+
+Units        the engineering units of the variable value.
+
+             The analog units (ranges) for variable objects are:
+
+                         0. Unused
+						 1. Deg. Celsius
+						 2. Deg. Fahrenheit
+						 3. Feet per Min.
+						 4. Pascals
+						 5. KPascals
+						 6. lbs/sqr.inch
+						 7. Inches of WC
+						 8. Watts
+						 9. KWatts
+                        10. KWHours
+                        11. Volts
+                        12. KVolts
+                        13. Amperes
+                        14. Milliamps
+                        15. CFM
+                        16. Seconds
+                        17. Minutes
+                        18. Hours
+                        19. Days
+                        20. Time
+                        21. Ohms
+                        22. %
+                        23. %RH
+                        24. p/min
+                        25. Counts
+                        26. %Open
+                        27. %Close
+                        28. CFH
+                        29. GPM
+                        30. GPH
+                        31. GAL
+                        32. CF
+                        33. BTU
+                        34. CMH
+                        35. Custom1
+                        36. Custom2
+                        37. Custom3
+                        38. Custom4
+                        39. Custom5
+                        40. Custom6
+                        41. Custom7
+                        42. Custom8
+
+             The digital ranges are the same as describe in 2.3.3 Inputs
+
+Label	     an 8 character label name
+
+
+2.3.5 Controllers ( TF55 )
+-------------------------
+
+	A PID controller is a tool used to direct a modulating output to maintain an
+input at setpoint. The controllers worksheet contains the following  fields:
+
+Input	    the name of the controlled point
+
+InValue	    the value of the controlled point
+
+Units       the engineering units of the Input value
+
+Auto/Man	it is a Toggle Value Field with two states: Auto and Manual. It
+            indicates whether the variable is in auto or manual mode. In auto
+            mode, the controller automatically generates an output value. In
+            manual mode, the value or state of the output is overridden by the
+            value shown in the Output column.
+
+Output	    the output value of the controller, between 0% and 100%.  This value
+            should be assigned to the control device
+
+Setpoint	the setpoint name for the controlled point
+
+Value	    displays the value of the setpoint
+
+Units       the engineering units of the setpoint value
+
+Action   	the action of the controller. The action can either be direct acting
+            "+" or  reverse acting "-".  Direct acting controllers are used when
+            a larger controller output value is needed to correct a controlled
+            variable that is too high.  Reverse acting controllers are used when
+            a larger controller output value  is needed to correct a too low
+            controlled variable.
+
+Prop	    the proportional band of the controller.  The proportional band is
+            the range through which the controller will modulate from 0-100%.
+            It is an integer value between 0 and 4000
+
+Reset 	    the reset component. It is an integer value betwwen 0 and 255
+
+Rate	    the rate component. It is an float value between 0.00 and 2.00
+
+Bias	    the bias. It is an integer value between 0 and 100
+
+The proportional band, reset and rate parameters can also be changed using
+Control Basic commands.
+
+
+2.3.6 Weekly routines ( TF56 )
+-----------------------------
+
+	Weekly routines are virtual object that provide convenient scheduling
+functions.  Each weekly routine contains a seven day week and a two day override.
+Each day has four on/off times.  Using twenty-four hour clock notation, any
+combination of on/off sequencing can be entered. Once a schedule is setup, it
+can then be used in Control Basic programs to start/stop equipment.
+
+The weekly routines worksheet contains the following  fields:
+
+Description 	a 20 character description.
+
+Auto/Man	    it is a Toggle Value Field with two states: Auto and Manual. It
+                indicates whether the schedule is in auto or manual mode. In auto
+                mode, the value is taken from the time schedule. In manual mode,
+                the value is overridden by the value shown in the Output column.
+
+Output	        indicates whether the schedule is on or off.
+
+Holiday1	    the point name that will enable the override. If the value of the
+                point defined here is "on", the schedule will take the value
+                from the first overide in the time schedule.
+
+State1          is the value of the object defined in Holiday1 field
+
+Holiday2	    the point name that will enable the override.
+                If the value of the point defined here is "on", and the Holiday1
+                field is not defined,
+                                        OR
+                If the value of the point defined here is "on", and the Holiday1
+                field is defined but its object value is 'off',
+                the schedule will take the value from the second overide in the
+                time schedule.
+
+                If the value of the point defined here is "on", and the Holiday1
+                field is defined but its object value is 'on',
+                the schedule will take the value from the first overide in the
+                time schedule. (Holiday1 has first priority ).
+
+State2          is the value of the object defined in Holiday2 field
+
+Label	        an 8 character label name.
+
+
+2.3.6.1 Time schedule (TF63)
+----------------------------
+
+To access the time schedule of a particular weekly routine press Insert key or
+open the popup menu (click the right mouse button) and select Show Object.
+The Time schedule (TF63) window will appear displaying the weekly routine that
+was chosen.
+The layout of the Time schedule window:
+
+      Mon    Tue    Wed    Thu    Fri     Sat     Sun     Hday1    Hday2
+     ----------------------------------------------------------------------
+ On |06:30|      |       |      |      |       |       |        |          |
+ Off|17:00|      |       |      |      |       |       |        |          |
+ On |     |      |       |      |      |       |       |        |          |
+ Off|     |      |       |      |      |       |       |        |          |
+ On |     |      |       |      |      |       |       |        |          |
+ Off|     |      |       |      |      |       |       |        |          |
+ On |     |      |       |      |      |       |       |        |          |
+ Off|     |      |       |      |      |       |       |        |          |
+     ----------------------------------------------------------------------
+
+Mon-Sun	       the day of the week on and off times.
+Hday1, Hday2   the first and second override
+
+Times are entered in hh:mm format.  Entering a time of 00:00 clears the field.
+When more than one on/off time is used on a particular day, the times must be
+entered in ascending order. Also, the on/off fileds should be fill in a
+seqouence order. Empty days will result in an "off" state of the schedule.
+
+
+2.3.7 Annual routines ( TF57 )
+------------------------------
+
+	Annual routines are virtual objects that can be On/Off depending on the days
+that are designated as holidays on a 365 day calendar year.
+The annual routines worksheet contains the following  fields:
+
+Description	    a 20 character description
+
+Auto/Man	    it is a Toggle Value Field with two states: Auto and Manual. It
+                indicates whether the schedule is in auto or manual mode. In auto
+                mode, the value is taken from the annual schedule. In manual mode,
+                the value is overridden by the value shown in the Output column.
+
+Output	        indicates whether the schedule is on or off.
+
+Label	        an 8 character label name.
+
+
+2.3.7.1 Annual schedule (TF64)
+-----------------------------
+
+To access the days of a particular annual routine press Insert key or open the
+popup menu (click the right mouse button) and select Show Object.
+The Annual schedule (TF64) window will appear.
+The layout of the Annual schedule window:
+
+[ NOTE: run WinT3000 and select Control->Annual routine command. The Annual schedule
+(TF64) will open. This window should not open here. This is just to see how
+it looks) ]
+
+         - Month: a ComboBox. The init value should be the current month
+         - Year : an edit box. The init value should be the current year
+         - UpDown button : increase or decrease the year number from Year edit
+                           box
+         - a table with the current month
+         - an OK button. If selected, the window will close and all the changes
+                         are saved
+         - a Cancel button. If selected, the window will close without to save
+                            the changes
+
+The date which is designated as holidays ( is "on" ) should be displayed on
+a yellow background. The user can mark or unmark a day as a holiday by
+clicking the mouse or pressing ENTER on the selected day. When a day is
+unmarked, the background should become white.
+
+
+2.3.8 Arrays ( TF58 )
+--------------------
+
+	An array is a virtual object that is used to store data. An array can have
+up to 255 element. The elements of the array can take on any numerical value
+(float type), and each element value can be recalled or updated at any time using
+Control Basic.
+The Arrays worksheet contains the following fields:
+
+Label	 an 8 character label name
+Length	 total number of elements in the array from 1 to 255
+
+Once the length have been specified, the elements of the array can be assigned
+using Control Basic. To view the entire contents of an array (TF65) press Insert
+key or open the popup menu (click the right mouse button) and select Show Object.
+
+When specifying an element within an array, the form "AYN[x]" must be used,
+where "N" is the array number and "x" is the element number within the array.
+Both N and x must be whole numbers.
+
+
+2.3.8.1 The Array elements (TF65)
+---------------------------------
+
+The Array elements worksheet contains the following fields:
+
+Value   the elements value 
+
+The worksheet has 255 rows, one row for every element of the array.
+
+
+3. Working with windows
+-----------------------
+
+	WinT3000 manipulates many types of windows that display information. A window
+can have a title bar, menu bar, pop up menu and a number of controls. WinT3000
+has windows that have a special design and regular windows.
+The types of windows the WinT3000 uses are:
+
+              Worksheets (Grids)
+              Screens
+              Graphs
+              Program editing windows
+              Other windows
+
+3.1 Worksheets
+
+   A worksheet is a tabular grid similar to Excel spreadsheet that list items and
+their related information. Numerical data and the all information that can
+be organized in lists appear in worksheet form to make editing and viewing easier.
+Usually the panel objects are displayed and manipulated in a worksheet.
+The rows of the table represent the objects and the columns represent the object
+properties.  The user can use the worksheet navigators ( scroll bars or arrow keys )
+to move through data in the grid and to edit data in the worksheet.
+Each column of a worksheet can be a specific field type with unique editing
+properties.  There are three types of fields:
+
+     1. Manual Editing Fields
+           To edit a manual editing field, such as Description or Label, move to
+           the field you want to edit and enter new data into the field.
+     2. Toggle Value Fields
+           Toggle fields like Auto/Man are fields that can have a value from a
+           predefined list of values (usually two values). The value can be
+           toggled by clicking the left mouse button or by pressing ENTER.
+     3. Multiple selection fields
+           This type of field is related to a list of values or ranges that are
+           setup in software.  By clicking on such a field, a list box will appear
+           and the user can select an item
+
+
+3.2 Screens
+
+	They are graphical windows showing panels' points.
+
+
+3.3 Graphs
+
+    They are graphcal windows showing trendlog.
+
+
+3.4 Program editing windows
+
+    They are editing windows for programming in Control Basic.
+
+
+3.5 Other windows
+
+    They are regular windows that works as an interface between the user and the
+application. In such windows the user manipulates different kind of controls:
+static text, buttons, editing fields, images.
+
+

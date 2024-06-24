@@ -1,0 +1,29 @@
+//---------------------------------------------------------------------------
+// T3000reg.cpp
+//
+// This file registers several of the components which appear on the "T3000"
+// Component palette in the C++ Builder IDE.
+//---------------------------------------------------------------------------
+
+#include <vcl/vcl.h>
+#pragma hdrstop
+#define REGISTER_ALL_CONTROLS
+
+#include "controls/calendar.cpp"
+#include "controls/tdbgrid.cpp"
+
+namespace T3000reg {
+  void __fastcall PACKAGE Register()
+  {
+    TComponentClass classes[] = { __classid(TCalendar),
+                                  __classid(TTDBGrid)
+//                                  __classid(TSpinButton),
+//                                  __classid(TSpinEdit)
+                                };
+
+    RegisterComponents("WinT3000",
+                        classes,
+                        (sizeof(classes)/sizeof(classes[0])) - 1);
+
+  } // Register
+}   // namespace T3000reg

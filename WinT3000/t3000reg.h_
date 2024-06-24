@@ -1,0 +1,25 @@
+//---------------------------------------------------------------------
+#if !defined (T3000RegHPP)
+#define T3000RegHPP
+
+//We define REGISTER_ALL_CONTROLS so that those header files below which
+//include other header files in the $(bcb)\wint3000\controls directory,
+//are able to find such other header files. 
+//
+//When a component is registered using $(bcb)\wint3000\t3000reg.cpp,
+//REGISTER_ALL_CONTROLS is similarly used to dictate which directory is 
+//searched by the compiler when including other header files in the 
+//$(bcb)\wint3000\controls directory. 
+//
+//When a component which has been registered using the file  
+//$(bcb)\wint3000\t3000reg.cpp, is dropped onto a form, the statement
+//#include <t3000reg.h> is added to the form's header file.
+//
+
+//#define REGISTER_ALL_CONTROLS
+
+#include <controls\tcalendar.h>
+#include <controls\tdbgrid.h>
+
+#endif  //T3000RegHPP
+

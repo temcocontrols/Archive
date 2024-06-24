@@ -1,0 +1,47 @@
+LIBRARY     PTPDLL.DLL
+
+EXPORTS
+    @ClientTransactionStateMachine$q16ServicePrimitives11FlowControlsssucpucpusucsuclt8pst8sucss @1   ; ClientTransactionStateMachine(ServicePrimitive,short,FlowControl,short,short,short,unsigned char,unsigned char*,unsigned short*,unsigned char,short,unsigned char,long,unsigned char*,short*,unsigned char*,short,unsigned char,short,short)
+    @CommINFO@$bctr$qv             @2   ; CommINFO::CommINFO()
+    @CommINFO@Connection$quc       @3   ; CommINFO::Connection(unsigned char)
+    @CommINFO@Connection$qv        @4   ; CommINFO::Connection()
+    @CommINFO@Set$qlssssssss       @5   ; CommINFO::Set(long,short,short,short,short,short,short,short,short)
+    @CommINFO@baudRate$qv          @6   ; CommINFO::baudRate()
+    @CommINFO@baudRateIndex$qv     @7   ; CommINFO::baudRateIndex()
+    @CommINFO@conPort$qv           @8   ; CommINFO::conPort()
+    @CommINFO@firstInitString$qpuc @9   ; CommINFO::firstInitString(unsigned char*)
+    @CommINFO@firstInitString$qv   @10  ; CommINFO::firstInitString()
+    @CommINFO@getmodemCapabilities$qr17ModemCapabilities @11  ; CommINFO::getmodemCapabilities(ModemCapabilities&)
+    @CommINFO@modemTypeIndex$quc   @12  ; CommINFO::modemTypeIndex(unsigned char)
+    @CommINFO@modemTypeIndex$qv    @13  ; CommINFO::modemTypeIndex()
+    @CommINFO@objectcount          @14  ; CommINFO::objectcount
+    @CommINFO@setRings$quc         @15  ; CommINFO::setRings(unsigned char)
+    @CommINFO@setmodemCapabilities$qp17ModemCapabilities @16  ; CommINFO::setmodemCapabilities(ModemCapabilities*)
+    @ProcCommTimerTimer$qss        @17  ; ProcCommTimerTimer(short,short)
+    @ProcEvConnection$qs           @18  ; ProcEvConnection(short)
+    @ProcEvReception$qs            @19  ; ProcEvReception(short)
+    @ProcEvTransmission$qss        @20  ; ProcEvTransmission(short,short)
+    @Routing_TABLE_T3000@HeartbeatTimer$qus @21  ; Routing_TABLE_T3000::HeartbeatTimer(unsigned short)
+    @Routing_TABLE_T3000@PortNet$qs @22  ; Routing_TABLE_T3000::PortNet(short)
+    @Routing_TABLE_T3000@PortNet$qv @23  ; Routing_TABLE_T3000::PortNet()
+    @Routing_TABLE_T3000@Ps$qv     @24  ; Routing_TABLE_T3000::Ps()
+    @Routing_TABLE_T3000@Ptr$qv    @25  ; Routing_TABLE_T3000::Ptr()
+    @Routing_TABLE_T3000@SilenceTimer$qus @26  ; Routing_TABLE_T3000::SilenceTimer(unsigned short)
+    @Routing_TABLE_T3000@Status$quc @27  ; Routing_TABLE_T3000::Status(unsigned char)
+    @Routing_TABLE_T3000@Status$qv @28  ; Routing_TABLE_T3000::Status()
+    @desinstallPort$qs             @29  ; desinstallPort(short)
+    @disconnectRequest$qs          @30  ; disconnectRequest(short)
+    @establishConnection$qspst2    @31  ; establishConnection(short,short*,short*)
+    @installPort$qpvs              @32  ; installPort(void*,short)
+    @networklayer$qssssspucst6ssss @33  ; networklayer(short,short,short,short,short,unsigned char*,short,unsigned char*,short,short,short,short)
+    @setDLLObjects$qp21Comctrls@TProgressBarpp15Extctrls@TImages @34  ; setDLLObjects(Comctrls::TProgressBar*,Extctrls::TImage*)
+    _CommInfo                      @35  
+    _DebugHook                     @36  
+    _ExceptionClass                @37  
+    _NetworkAddress                @38  
+    _NetworkName                   @39  
+    _Routing_table                 @40  
+    _Station_NAME                  @41  
+    _Station_NUM                   @42  
+    _VendorID                      @43  
+    _ready_for_descriptors         @44  

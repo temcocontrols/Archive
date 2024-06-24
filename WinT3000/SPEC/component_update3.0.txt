@@ -1,0 +1,85 @@
+C++Builder 1.0 components require modification and recompilation before they
+can be installed in C++Builder 3.0. If you don’t have access to the source code,
+contact the vendor who supplied the components.
+
+PACKAGE modifier
+
+The PACKAGE modifier must appear in all declarations of the component class,
+including forward and friend declarations, and in the declaration of the Register
+function. PACKAGE is a macro defined in Sysdefs.h that allows classes to be 
+imported and exported from a BPL file. Omitting PACKAGE from class declarations 
+will result in access violations at runtime.
+
+Where you find declarations like
+
+class SomeComponent;
+
+friend class SomeOtherComponent;
+
+change them to
+
+class PACKAGE SomeComponent;
+
+friend class PACKAGE SomeOtherComponent;
+
+In the CPP file where the component is defined, include the PACKAGE macro in the 
+declaration of the Register function:
+
+void __fastcall PACKAGE Register()
+
+Multiple .CPP source modules
+
+C++Builder 3.0 requires a matching header file for each source file where a component 
+is registered. If a component is registered in COMP1.CPP, you need a corresponding header 
+file called COMP1.H.
+
+Some older components—including sample components that shipped with C++Builder 1.0—are 
+registered in a single .CPP file that #includes other .CPP files. When compiled with 
+C++Builder 3.0, such files produce incorrect runtime type information. To fix these 
+components, modify the main registration .CPP file so that it #includes only header 
+files. Then create a new package project in the C++Builder 3.0 IDE that contains each 
+of the .CPP files, making sure that the #pragma package(smart_init) directive appears 
+(after the #includes) in each .CPP file.
+
+Trouble-shooting component installation
+
+If a component is not available in the IDE after installation, here are some problems 
+to check for:
+
+The PACKAGE modifier is missing in the Register function or in the class declaration.
+	The #pragma package(smart_init) directive does not appear in a .CPP source file.
+	The Register function is not found in a name space with exactly the same name as 
+the source-code module.
+	Register is not being successfully exported. Use the TDUMP utility to look for 
+the exported function:
+
+  tdump -ee=register mypack.bpl
+
+TDump displays all exported functions containing the word “register” in them. You should 
+see something like:
+
+  EXPORT ord:0006='MyComponent::Register() __fastcall'
+
+Debugging installed componets
+
+To debug components, you can use the integrated debugger to launch C++Builder:
+
+1. Choose Project|Options, select the Directories/Conditionals tab, and set Debug Source 
+Path to your component source code. The package project does not have to be open in the IDE.
+
+2. Choose Tools|Environment Options and select the Debugger tab. Under Exceptions, select 
+the exceptions you want.
+
+3. Open the component source and set breakpoints.
+
+4. Choose Run|Parameters and set Host Application to CBuilder3\BIN\BCB.EXE.
+
+5. Click the Load button. You should see the CPU window.
+
+1. 	Choose Run|Run to launch BCB.EXE.
+
+Example component name changes
+
+For C++Builder 1.0 projects that use the example components, note that the classnames for 
+these sample components have been renamed.  For example, TCalendar is now TCCalendar, 
+TDirectoryOutline is now TCDirectoryOutline, and so on.

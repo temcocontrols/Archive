@@ -1,0 +1,50 @@
+net_call
+--------
+
+
+After a port is installed and a connection was established, an
+application can make request to the remote panels using net_call() function:
+
+	int net_call(int command, int arg,  char *data, unsigned int *length ,
+	       int dest, int network, int others=0, int timeout=TIMEOUT_NETCALL,
+	       char *returnargs=NULL, int *length_returnargs=NULL,
+	       char *sendargs=NULL, int length_sendargs=0, char bytearg=0, int port=-1
+	       );
+
+	command  -  define the request. If is of type 'CommandRequest'.
+			(see t3000def.h  for 'CommandRequest')
+	arg      -  define the argument of a command ( 2 bytes )
+	data     -  pointer to data buffer. A write command will write data from
+                    this buffer. A read command will read data in this buffer.
+	length   -  pointer to data length.
+			If it is a write request, 'length' should be the length
+			of data to be send.
+			If it is a read request, 'length' will be set by client to the
+			data length read from the remote panel.
+	dest     -  the remote panel number where the request will be directed
+	network  -  the network number of the remote panel
+	others   -  BACnetConfirmedRequestPDU = 0x00   - confirm request; the client
+						wait for the request to be confirmed
+                    BACnetUnconfirmedRequestPDU = 0x01 - unconfirmed request; the
+				client does not wait for confirmation
+	timeout  -  timeout, the client wait for 'timeout' seconds before to return
+							an timeout error code
+	returnargs        - pointer to an additional data buffer returned by some commands
+	length_returnargs - pointer to the length of data returned in 'returnargs'
+			buffer
+	sendargs          - pointer to an additional data buffer to be sent  by some
+			commands
+	length_sendargs   - length of data pointed by 'sendargs' to be sent
+	bytearg  - define the third byte as argument of a command ( 1 bytes )
+        port     - it is not relevant only for ESTABLISH_CONNECTION_PORT command 
+
+The function returns:
+     SUCCESS    - the request was accomplished with succes
+     ERROR_COM  - errror request
+     USER_ABORT - error request; the user aborted the request
+
+
+
+
+
+

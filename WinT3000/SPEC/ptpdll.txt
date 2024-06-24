@@ -1,0 +1,237 @@
+PTPDLL - Dynamic-link Library
+-------------------------------
+
+
+'PTPDLL.DLL' implements the PTP protocol and support for serial communication.
+It implements functions and data that can be referred by an application.
+There are two methods for calling a function in a DLL:
+
+1.	Load-time dynamic linking occurs when an application's code makes an explicit
+    call to a DLL function. This type of linking requires that the executable
+    module of the application be built by linking with the DLL's import library,
+    which supplies the information needed to locate the DLL function when the
+    application starts
+    To statically load a DLL when a C++Builder application is loaded, link the
+    import library file for that DLL into your C++Builder application at link
+    time. To add an import library to a C++Builder application:
+           - add library name (ptpdll.lib) to the project
+          OR
+           - open the make file (.mak file) for the application and add the import
+             library name (ptpdll.lib) to the library file list assigned to the
+             ALLLIB variable. If necessary, add the path of the import library
+             to the path(s) listed for the -L option of LFLAGS (linker options)
+             variable
+    The exported functions of that DLL then become available for use by  the
+    application. Prototype the DLL functions the application uses with
+    __declspec(dllimport) modifier or use the _import keyword:
+
+     __declspec(dllimport) return_type imported_function_name(parameters);
+                          OR
+      return_type _import imported_function_name(parameters);
+
+
+    To make available the exported data of that DLL to the application use
+    the _import keyword :
+               data_type _import <data name>;
+                          OR
+               data_type __import <data name>;
+
+2. 	Run-time dynamic linking occurs when a program uses the LoadLibrary and
+    GetProcAddress functions to get the starting address of a DLL function.
+    This type of linking eliminates the need to link with an import library
+
+
+
+Implementation of PTP protocol and serial communication is based on two
+arrays of objects:
+
+     COMMINFO  CommInfo[MAX_COMM_INFO];
+         - store COM settings information. The entries correspond to
+           COM1 - COM4
+
+     ROUTING_TABLE_T3000  Routing_table[MAX_Routing_table];
+         - define the parameters and control the status of a connection port
+           ( communication pipe ). One entry is created for every port installed.
+           This object is used internally by the DLL.
+
+
+The exportable functions of ptpdll.dll are:
+
+  DInt installPort(HWND Handle, DInt comPort);
+       - install a communication port. Parameters:
+               Handle  - the handle of the application. It is used by ptpdll.dll
+                         to send messages to the application when necessary
+               comPort - COM number used for this connection
+                         0 - COM1
+                         .......
+                         3 - COM4
+         No connection is yet established.
+       - the return value is an error code of type PortError(see ptpdll.h)
+
+  DInt desinstallPort(DInt comPort);
+       - desinstall the communication port 'comPort'
+
+
+  DInt establishConnection(DInt comPort, DInt *networkaddress, DInt *station_num);
+       - try to establish connection on communication port 'comPort'. The
+         communication port 'comPort' should be installed, otherwise an error
+         code will be return.
+         The application should also provide two parameters:
+                  DInt *networkaddress
+                         and
+                  DInt *station_num
+         If the connection is established, the DLL will set these parameters
+         to the network address respectiv to the panel number of the remote
+         panel.
+       - the reurn value is of type PortError
+
+  void disconnectRequest(DInt comPort);
+       - disconnect the communication port 'comPort'. The communication port
+         is not desinstalled. You can re-establish the connection using the
+         function establishConnection(..);
+
+
+  int ClientTransactionStateMachine(
+			 ServicePrimitive Event,  DInt Service, FlowControl flowcontrol, DInt network,
+			 DInt destination, DInt source, DByte invokeID, DByte *data, DUint *data_length,
+			 DByte command, DInt arg, DByte vendorID, DLong timeout = TIMEOUT_NETCALL,
+			 DByte *returnargs=NULL, DInt *length_returnargs=NULL,
+			 DByte *sendargs=NULL, DInt length_sendargs=0, DInt task = -1, DInt str_size=MAXASDUSIZE
+			);
+       - this function implements the client part of the application. This function
+         is called by t3000Request() function. Any request at the application
+         layer is done by t3000Request(). This function is not implemented in
+         ptpdll.dll (I will provide it):
+
+          DInt t3000Request(DInt command, DInt arg,  DByte *data, DUint *length,
+                            DInt dest, DInt network, DInt others=0, DInt timeout=TIMEOUT_NETCALL,
+			                DByte *returnargs=NULL, DInt *length_returnargs=NULL,
+                            DByte *sendargs=NULL, DInt length_sendargs=0, DByte bytearg=0);
+
+  void setDLLObjects(TProgressBar *progressbar, TImage *timagerun[], DInt maximage);
+      - this function provide a progress bar object and a TImage array object
+        used by the communication functions to visualy notify the state of
+        communication
+
+
+  The ptpdll.dll generates 3 user define messages :
+
+      WM_PTP_RECEPTION
+      WM_PTP_TRANSMISSION
+      WM_PTP_CONNECTION
+
+  The application should respond to these messages with:
+
+    ProcEvTransmission((DInt)Msg.WParam, (DInt)Msg.LParam);
+    ProcEvConnection((DInt)Msg.WParam);
+    ProcEvReception((DInt)Msg.WParam);
+
+  The application should create a timer with 100 miliseconds resolution and
+  should respond to every timer event with:
+
+    void ProcCommTimerTimer(DInt comPort);
+
+    where comPort is the communication port assigned with this timer
+
+
+The exportable data are:
+
+     COMMINFO  CommInfo[MAX_COMM_INFO];
+     DInt  Station_NUM=29;
+     DByte Station_NAME[17];
+     DInt  NetworkAddress=77;
+     DByte NetworkName[16];
+
+
+Class CommINFO
+--------------
+
+    The class embeds data and methods that allow the user to set the communication
+ports and to retrieve status information.
+
+Data members:
+------------
+	SETTINGS  Settings;
+       - store information related to COM settings:
+         baudrate, parity, wordlenth, stop bits, dtr, rts, xonxoff, rtscts, dtrdsr
+
+	ModemCapabilities modemcapabilities;
+       - store information related to modem settings
+
+Methods:
+-------
+
+     - COM port setting
+	   void Set( DLong baudRate  = UNCHANGED,
+				 DInt parity     = UNCHANGED,
+				 DInt wordLength = UNCHANGED,
+				 DInt stopBits   = UNCHANGED,
+				 DInt dtr        = UNCHANGED,
+				 DInt rts        = UNCHANGED,
+				 DInt xon_xoff   = UNCHANGED,
+				 DInt rts_cts    = UNCHANGED,
+				 DInt dtr_dsr    = UNCHANGED );
+
+     - modem setting
+	   void  modemCapabilities(ModemCapabilities &mc);
+
+     - set modem type index
+       void  modemTypeIndex(DByte mti);
+
+     - set first init string
+       void  firstInitString(DByte *first);
+
+     - set connection type
+	   void Connection( DByte c );
+          where 'c' casn be NONE, SERIAL, MODEM
+
+
+     - get Baudrate
+       DLong baudRate(void);
+
+     - get Baudrate index
+       DByte baudRateIndex(void);
+
+     -  get modem type index
+       DByte modemTypeIndex(void);
+
+     - get first init string
+       DByte *firstInitString(void);
+
+     - get connection type
+	   DByte Connection( void );
+         - the return value can be NONE, SERIAL, MODEM. This method is used to
+           test the type of connection on a COM port or if the COM port is
+           configured. If the returned value is NONE, this means that the port
+           is not configured.
+
+     - get connection port
+       DInt conPort(void);
+         - returns -1 if the port it is not installed or a value greater or equal
+           to zero if the port is installed. This method is used to test if a
+           COM port is installed
+
+
+Here are the steps to open, use and close a connection:
+
+  1. provide a progress bar object and a TImage array object
+       setDLLObjects(TProgressBar *progressbar, TImage *timagerun[], DInt maximage);
+  2. install a  communication port
+       installPort(HWND Handle, DInt comPort);   comPort is the COM port
+                                                 Handle  is the handle of the application
+  3. establish the connection
+       establishConnection(DInt comPort, DInt *networkaddress, DInt *station_num);
+  4. do any request using  t3000Request()
+  5. disconnect
+       disconnectRequest(DInt comPort);
+  6. desinstall the communication port
+       desinstallPort(DInt comPort);
+
+The modules that define the DLL are:
+      ptpdll.dll    - used by the application
+      ptpdll.lib    - used by the linkeditor
+      ptpdll.h      - need to be include in a source file
+                      that make use of the DLL data and functions
+
+
+
