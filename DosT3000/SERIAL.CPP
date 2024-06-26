@@ -10,7 +10,6 @@
 #include <graphics.h>
 #include "ggrid.h"
 #include "graph.h"
-#include "router.h"
 #include "serial.h"
 #include "rs232.h"
 #include "mtkernel.h"

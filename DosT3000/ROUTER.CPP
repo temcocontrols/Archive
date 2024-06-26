@@ -2,7 +2,6 @@
 
 #include <windows.h>
 #include <graphics.h>
-#include "router.h"
 #include "t3000def.h"
 #include "aio.h"
 #include "ptp.h"
@@ -832,10 +831,10 @@ int nettask(void)
 					if( iamnewonnet )
 					{
 // send I want to connect to net
-					 net_call(COMMAND_50+100, 70+(0x10<<8), (char *)&j, &i, 255, Routing_table[k].Port.network, BACnetUnconfirmedRequestPDU|NETCALL_SOURCE255,  //|NETCALL_NOTTIMEOUT
+					 net_call(COMMAND_50+100, 70+(0x10<<8), (char *)&j, &i, 255, Routing_table[k].Port.network, BACnetUnconfirmedRequestPDU, //|NETCALL_SOURCE255,  //|NETCALL_NOTTIMEOUT
 											 TIMEOUT_NETCALL,NULL,NULL,NULL,0,0,k);
-					 delay(200);
-					 net_call(COMMAND_50+100, 70+(0x10<<8), (char *)&j, &i, 255, Routing_table[k].Port.network, BACnetUnconfirmedRequestPDU|NETCALL_SOURCE255,  //|NETCALL_NOTTIMEOUT
+					 delay(400);
+					 net_call(COMMAND_50+100, 70+(0x10<<8), (char *)&j, &i, 255, Routing_table[k].Port.network, BACnetUnconfirmedRequestPDU, //|NETCALL_SOURCE255,  //|NETCALL_NOTTIMEOUT
 											 TIMEOUT_NETCALL,NULL,NULL,NULL,0,0,k);
 					 delay(4000);
 					 iamnewonnet = 0;
@@ -896,9 +895,9 @@ int nettask(void)
 					if(cdata->newpanelbehind)
 					{
 					 cdata->newpanelbehind = 0;
-					 net_call(COMMAND_50+100, 70+(0x20<<8), (char *)&j, &i, 255, Routing_table[k].Port.network, BACnetUnconfirmedRequestPDU|NETCALL_SOURCE255, //|NETCALL_NOTTIMEOUT
+					 net_call(COMMAND_50+100, 70+(0x20<<8), (char *)&j, &i, 255, Routing_table[k].Port.network, BACnetUnconfirmedRequestPDU, //|NETCALL_SOURCE255, //|NETCALL_NOTTIMEOUT
 											 TIMEOUT_NETCALL,NULL,NULL,NULL,0,0,k);
-			     generatealarm("Panel number conflict on network!", 0, Station_NUM, GENERAL_ALARM, 1, 0, NULL, 0);
+					 generatealarm("Panel number conflict on network!", 0, Station_NUM, GENERAL_ALARM, 1, 0, NULL, 0);
 					}
 				 }
 			}
@@ -907,7 +906,7 @@ int nettask(void)
 		continue;
 	 }
 /*
-// if a ethernet panel becomes accidentally off it is not signaled 
+// if a ethernet panel becomes accidentally off it is not signaled
 	 if( pipx != NULL )
 	 {
 		if( pipx->port_state==IPX_ACTIVE )

@@ -7,7 +7,7 @@
 #include <mem.h>
 #include <graphics.h>
 #include <fcntl.h>
-//#include <SYS\STAT.H>
+#include <SYS\STAT.H>
 #define LINE_SPACE (mode_text ? 0 : 4)
 #include "_msdos.h"
 

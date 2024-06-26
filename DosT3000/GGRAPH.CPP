@@ -29,7 +29,6 @@
 #define  FORWARD  1
 #define  BACK     0
 
-#include "router.h"
 #include "t3000def.h"
 #include "mtkernel.h"
 #include "vga12.h"

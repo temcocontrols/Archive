@@ -123,7 +123,7 @@ extern Point_Net current_opened_grp;
 extern char control;
 extern byte serial_access;
 
-extern char gpointname[11];
+extern char gpointname[17];
 extern int network_select, network_sel_tmp;
 extern int panel_select, panel_sel_tmp;
 

@@ -14,7 +14,6 @@
 #include "net_bac.h"
 #include "baseclas.h"
 #include "mtkernel.h"
-#include "router.h"
 #include "t3000def.h"
 #include "graph.h"
 #include "serial.h"
@@ -23,8 +22,9 @@
 #define ON   1
 #define OFF  0
 
-#define POOL_BUF_SIZE (long)MAX_SAMPLE*(long)MAX_INP*4L+MAX_INP*10*4+MAX_MEM_DIG_BUF+400+MAX_HEADERS_AMON*sizeof(Header_amon)+MAX_HEADERS_DMON*sizeof(Header_dmon)+810
+//#define POOL_BUF_SIZE (long)MAX_SAMPLE*(long)MAX_INP*4L+MAX_INP*10*4+MAX_MEM_DIG_BUF+400+MAX_HEADERS_AMON*sizeof(Header_amon)+MAX_HEADERS_DMON*sizeof(Header_dmon)+810
 
+extern int	get_point_info(Point_info *point_info, char **des=NULL, char **label=NULL, char **ontext=NULL, char **offtext=NULL, char pri=0, int network = 0xFFFF);
 extern int net_call(int command, int arg,  char *data, uint *length , int dest,
 				 int network, int others=0, int timeout=TIMEOUT_NETCALL,
 				 char *returnargs=NULL, int *length_returnargs=NULL,
@@ -35,7 +35,10 @@ extern long timestart;
 extern char ready_for_descriptors;
 extern char sendinfoflag;
 extern NETWORK_POINTS	_far network_points_list[MAXNETWORKPOINTS];
-extern REMOTE_POINTS _far  remote_points_list[MAXREMOTEPOINTS82];
+extern REMOTE_POINTS  _far remote_points_list[MAXREMOTEPOINTS82];
+extern NETWORK_POINTS _far response_router_points_list[MAXNETWORKPOINTS];
+extern Point_Net _far request_router_points_list[MAXREMOTEPOINTS82];
+
 extern Panel *ptr_panel;
 
 extern int encodetag(char cl, char t, char *tag, unsigned length);
@@ -47,11 +50,15 @@ extern int networklayer( int service, int priority, int network, int destination
 				int data_expecting_reply=BACnetDataNotExpectingReply, int clientserver=CLIENT,
 				int port = -1);
 
-extern char netpointsflag;
+extern Time_block ora_current;
+extern char _far sendtime_ipx;
 extern int ipxport, rs485port;
-extern char wantpointsentry;
-extern int timepoints;
-//char netpointsflag_ipx;
+extern signed char wantpointsentry, wantpointsentry_router;
+extern signed char np_ipx_networkpoints_type, np_rs485_networkpoints_type;
+extern signed char wp_ipx_networkpoints_type, wp_rs485_networkpoints_type;
+
+char netpointsflag_ipx=1;
+int timepoints_ipx=400;
 
 void NET_SENDFRAMEPOOL::Init_frame_pool( SEND_FRAME_ENTRY *buffer )
 {
@@ -60,7 +67,8 @@ void NET_SENDFRAMEPOOL::Init_frame_pool( SEND_FRAME_ENTRY *buffer )
 	memset( Frame,0, NET_NMAXSENDFRAME*sizeof(FRAME) );
 }
 
-SEND_FRAME_ENTRY *NET_SENDFRAMEPOOL::NextFreeEntry( int reply, int command )
+//SEND_FRAME_ENTRY *NET_SENDFRAMEPOOL::NextFreeEntry( int reply, int command )
+SEND_FRAME_ENTRY *NET_SENDFRAMEPOOL::NextFreeEntry( int reply )
 {
 	register SEND_FRAME_ENTRY *frame_ptr;
 	register int i;
@@ -68,6 +76,7 @@ SEND_FRAME_ENTRY *NET_SENDFRAMEPOOL::NextFreeEntry( int reply, int command )
 //	if( no_of_used_frames >= ( NET_NMAXSENDFRAME - 1 ) )
 //		set_semaphore( &Using_send_frame );
 
+/*
 	if( command )
 	{
 	 frame_ptr = Frame;
@@ -86,10 +95,8 @@ SEND_FRAME_ENTRY *NET_SENDFRAMEPOOL::NextFreeEntry( int reply, int command )
 	 }
 	 while( i < NET_NMAXSENDFRAME );
 	}
+*/
 
-
-
-	no_of_used_frames++;
 	frame_ptr = Frame;
 
 	i=0;
@@ -100,6 +107,7 @@ SEND_FRAME_ENTRY *NET_SENDFRAMEPOOL::NextFreeEntry( int reply, int command )
 			frame_ptr->being_used = 1;
 			frame_ptr->locked = 1;
 			frame_ptr->reply_flag = reply;
+			no_of_used_frames++;
 			return frame_ptr;
 		}
 		i++;
@@ -199,7 +207,7 @@ void NET_BAC::Release_ControlBlock( byte index )
 
 void NET_BAC::initData( Panel_info1 *info )
 {
-  int i;
+	int i;
 	memset( ReceiveFramePool, 0, NET_NMAXRECEIVEFRAME*sizeof(FRAME) );
 	activity = 0;
 	rec_comm_active = 0;
@@ -230,7 +238,16 @@ void NET_BAC::initData( Panel_info1 *info )
 	FirstToken = -1;
 	panelconnected = 0;
 	laststation_connected = -1;
-  newpanelbehind = 0;
+	newpanelbehind = 0;
+	wantpointsentry = 0;
+	memset(network_points_list, 0, sizeof(network_points_list));
+	wantpointsentry_router = 0;
+	memset(request_router_points_list, 0, sizeof(request_router_points_list));
+  memset(response_router_points_list, 0, sizeof(response_router_points_list));
+	timepoints_ipx=400;
+  dayofyear = 0;
+	np_ipx_networkpoints_type=0;
+	wp_ipx_networkpoints_type=0;
 }
 
 void NET_BAC::InitNetData( Panel_info1 *info, byte task_no )
@@ -254,10 +271,10 @@ void NET_BAC::InitNetData( Panel_info1 *info, byte task_no )
 	real_Receive_pool_DS = par_sel>>16;
 	ReceiveFramePool = ( FRAME far *)MK_FP( i, 0 );
 
-	mfarmalloc( &ser_data, POOL_BUF_SIZE );
-	ser_pool.init_pool( ser_data, POOL_BUF_SIZE );
+	mfarmalloc(&ser_data, SERIAL_BUF_SIZE);
+	ser_pool.init_pool(ser_data, SERIAL_BUF_SIZE);
 
-  initData( info );
+	initData( info );
 }
 
 void NET_BAC::ReleaseRealMemory( void )
@@ -387,13 +404,155 @@ void NET_BAC::SignOff( void )
 	}
 }
 
+void NET_BAC::sendFrameTask(void)
+{
+	SEND_FRAME_ENTRY *frame_ptr;
+	byte i;
+
+	disable();
+	while( ( frame_ptr = SendFramePool.FrameAvailable( 0 ) ) )
+	{
+		enable();
+		i=0;
+		while( i<NET_NMAXSENDFRAME && send_list[i].state != IDLE_DG )
+			i++;
+		if( i < NET_NMAXSENDFRAME )
+		{
+				disable();
+				send_list[i].number = Get_ControlBlock();
+				if( send_list[i].number >= 0 )
+				{
+					send_list[i].frame.send = frame_ptr;
+					send_list[i].state = SENDING_DG;
+					enable();
+					// if( frame_ptr->Destination == 0x0FF )
+					//  	msleep( 2 );
+					disable();
+					SendFrame( i );
+				}
+				else
+					send_list[i].number = -1;
+				enable();
+				msleep( 2 );
+		}
+	}
+	enable();
+	for( i=0; i<NET_NMAXSENDFRAME; i++ )
+	{
+		disable();
+		if( send_list[i].state == SENDING_DG )
+		{
+			if( TestCompletion( send_list[i].number ) )
+			{
+				SendFramePool.RemoveSentEntry( send_list[i].frame.send );
+				enable();
+				disable();
+				Release_ControlBlock( send_list[i].number );
+				send_list[i].number = -1;
+				send_list[i].state = IDLE_SD;
+				activity = 1;
+			}
+			enable();
+		}
+		enable();
+	}
+}
+
+FRAME far rec_frame_et;
+void NET_BAC::receiveFrameTask(void)
+{
+//	FRAME *rec_frame;
+	byte i, f, type;
+
+	for( i=0; i<NET_NMAXRECEIVEFRAME; i++ )
+	{
+		if( rec_list[i].state == WAITING_DG )
+		{
+			disable();
+			if( TestCompletion( rec_list[i].number ) )
+			{
+				f=0;
+				if( FinalResultCode( rec_list[i].number ) == 0 )
+				{
+					rec_list[i].state = RECEIVED_DG;
+					memmove(&rec_frame_et, rec_list[i].frame.rec, sizeof(FRAME));
+					// rec_frame = rec_list[i].frame.rec;
+					if( rec_frame_et.Source != Station_NUM && !end_task )
+					{
+							CopySourceAddress( rec_frame_et.Source-1, rec_list[i].number );
+							enable();
+							f=1;
+							type = rec_list[i].type;
+							/*
+							networklayer( DL_UNITDATAindication, NORMALmessage, panel_info1.network,
+								rec_frame_et.Destination, rec_frame_et.Source,
+								rec_frame_et.Buffer, rec_frame_et.Length, NULL, 0,
+								rec_list[i].type?BACnetDataNotExpectingReply:BACnetDataExpectingReply,
+								SERVER, port_number );
+*/
+					}
+				}
+				//else
+				// rec_list[i].state = REC_ERROR;
+				disable();
+				rec_comm_active--;
+				if( rec_list[i].type )
+					rec_br_comm_active--;
+				Release_ControlBlock( rec_list[i].number );
+				rec_list[i].number = -1;
+				rec_list[i].state = IDLE_DG;
+				activity = 1;
+				enable();
+				if( f )
+				{
+					networklayer( DL_UNITDATAindication, NORMALmessage, panel_info1.network,
+								rec_frame_et.Destination, rec_frame_et.Source,
+								rec_frame_et.Buffer, rec_frame_et.Length, NULL, 0,
+								type?BACnetDataNotExpectingReply:BACnetDataExpectingReply,
+								SERVER, port_number );
+				}
+			}
+			enable();
+		}
+	}
+
+	while( rec_comm_active < NET_NMAXRECEIVEFRAME && !end_task )
+	{
+		for( i=0; i<NET_NMAXRECEIVEFRAME; i++ )
+		{
+			if( rec_list[i].state == IDLE_DG )
+			{
+					disable();
+					rec_list[i].number = Get_ControlBlock();
+					enable();
+					disable();
+					if( rec_list[i].number >= 0 )
+					{
+						rec_comm_active++;
+						rec_list[i].state = WAITING_DG;
+						if( !rec_br_comm_active )
+						{
+							rec_br_comm_active++;
+							rec_list[i].type = 1;
+						}
+						else
+							rec_list[i].type = 0;
+						rec_list[i].frame.rec = ReceiveFramePool+i;
+						enable();
+						disable();
+						ReceiveFrame( i );
+					}
+					else
+						rec_list[i].number = -1;
+					enable();
+			}
+		}
+	}
+}
 
 void NET_BAC::NetControl( void )
 {
-	byte j, i;
 	uint length;
-	FRAME *rec_frame;
-	SEND_FRAME_ENTRY *frame_ptr;
 
 	if( newpanelbehind )
 	{
@@ -423,22 +582,36 @@ void NET_BAC::NetControl( void )
 	}
 */
 //           if time want points and network points
-				 if(netpointsflag==3)
+
+				 if(netpointsflag_ipx)
 				 {
+					if(wantpointsentry || wantpointsentry_router)
+					{
 					 if( ipxport!=-1 )
-					 net_call(COMMAND_50, SEND_NETWORKPOINTS_COMMAND, 0, 0, 255, Routing_table[rs485port].Port.network, BACnetUnconfirmedRequestPDU,    //|NETCALL_NOTTIMEOUT,
+						 net_call(COMMAND_50, SEND_NETWORKPOINTS_COMMAND, 0, 0, 255, Routing_table[ipxport].Port.network, BACnetUnconfirmedRequestPDU,    //|NETCALL_NOTTIMEOUT,
 											 TIMEOUT_NETCALL,NULL,NULL,NULL,0,0,ipxport);
-					 memset(network_points_list, 0, sizeof(network_points_list));
-					 netpointsflag=0;
-					 wantpointsentry=0;
-					 timepoints = 40;
+//					 memset(network_points_list, 0, sizeof(network_points_list));
+					}
+					 netpointsflag_ipx=0;
+//					 wantpointsentry=0;
+					 timepoints_ipx = 50;
 				 }
+/*
 				 if(netpointsflag==1)
 				 {
 					 if(wantpointsentry)
 					 {
 						netpointsflag=2;
-						resume(NETTASK);
+//						resume(NETTASK);
+						 for(j=0; j<MAXNETWORKPOINTS; j++)
+						 {
+							if( network_points_list[j].info.point.point_type )
+							{
+							 get_point_info(&network_points_list[j].info,NULL,NULL,NULL,NULL,1, network_points_list[j].info.point.network);
+							}
+						 }
+						 netpointsflag=3;
+
 					 }
 					 else
 					 {
@@ -446,14 +619,33 @@ void NET_BAC::NetControl( void )
 						timepoints = 50;
 					 }
 				 }
-				 if (!timepoints && !netpointsflag)
+*/
+				 if (!timepoints_ipx && !netpointsflag_ipx)
 				 {
 					if( ipxport!=-1 )
-					 net_call(COMMAND_50, SEND_WANTPOINTS_COMMAND+(1<<8), 0, 0, 255, Routing_table[rs485port].Port.network, BACnetUnconfirmedRequestPDU,   //|NETCALL_NOTTIMEOUT,
+					 net_call(COMMAND_50, SEND_WANTPOINTS_COMMAND+(1<<8), 0, 0, 255, Routing_table[ipxport].Port.network, BACnetUnconfirmedRequestPDU,   //|NETCALL_NOTTIMEOUT,
 											 TIMEOUT_NETCALL,NULL,NULL,NULL,0,0,ipxport);
-					netpointsflag=1;
+					netpointsflag_ipx=1;
 				 }
 //  syncronize time
+				 if(sendtime_ipx)
+				 {
+					 sendtime_ipx=0;
+					 sendinfoflag = 1;
+					 sendinfo_flag|=SENDINFO_TIME;
+					 resume(NETTASK);
+					 dayofyear = 0;
+				 }
+				 else
+					if( dayofyear!=ora_current.dayofyear )
+					{
+						dayofyear=ora_current.dayofyear;
+						sendinfoflag = 1;
+						sendinfo_flag|=SENDINFO_TIME;
+						resume(NETTASK);
+					}
+
+				 //  syncronize time
 /*
 				 if( dayofyear!=ora_current.dayofyear )
 				 {
@@ -466,105 +658,8 @@ void NET_BAC::NetControl( void )
 						}
 				 }
 */
-
-	while( ( frame_ptr = SendFramePool.FrameAvailable( 0 ) ) )
-	{
-		i=0;
-		while( i<NET_NMAXSENDFRAME && send_list[i].state != IDLE_DG )
-			i++;
-		if( i < NET_NMAXSENDFRAME )
-		{
-				send_list[i].number = Get_ControlBlock();
-				if( send_list[i].number >= 0 )
-				{
-					send_list[i].frame.send = frame_ptr;
-					send_list[i].state = SENDING_DG;
-					if( frame_ptr->Destination == 0x0FF )
-						msleep( 2 );
-					SendFrame( i );
-				}
-				else
-					send_list[i].number = -1;
-		}
-	}
-	for( i=0; i<NET_NMAXSENDFRAME; i++ )
-	{
-		if( send_list[i].state == SENDING_DG )
-		{
-			if( TestCompletion( send_list[i].number ) )
-			{
-				SendFramePool.RemoveSentEntry( send_list[i].frame.send );
-				Release_ControlBlock( send_list[i].number );
-				send_list[i].number = -1;
-				send_list[i].state = IDLE_SD;
-				activity = 1;
-			}
-		}
-	}
-
-	for( i=0; i<NET_NMAXRECEIVEFRAME; i++ )
-	{
-		if( rec_list[i].state == WAITING_DG )
-		{
-			if( TestCompletion( rec_list[i].number ) )
-			{
-				if( FinalResultCode( rec_list[i].number ) == 0 )
-				{
-					rec_list[i].state = RECEIVED_DG;
-					rec_frame = rec_list[i].frame.rec;
-					if( rec_frame->Source != Station_NUM && !end_task )
-					{
-//			int networklayer( int service, int priority, int network, int destination, int source,
-//						char *asdu_npdu, int length_asdu_npdu, char *apci, int length_apci,
-//						int data_expecting_reply=BACnetDataNotExpectingReply, int clientserver=CLIENT, int port = -1 );
-						CopySourceAddress( rec_frame->Source-1, rec_list[i].number );
-						networklayer( DL_UNITDATAindication, NORMALmessage, panel_info1.network,
-								rec_frame->Destination, rec_frame->Source,
-								rec_frame->Buffer, rec_frame->Length, NULL, 0,
-								rec_list[i].type?BACnetDataNotExpectingReply:BACnetDataExpectingReply,
-								SERVER, port_number );
-					}
-				}
-//				else
-//					rec_list[i].state = REC_ERROR;
-
-				rec_comm_active--;
-				if( rec_list[i].type )
-					rec_br_comm_active--;
-				Release_ControlBlock( rec_list[i].number );
-				rec_list[i].number = -1;
-				rec_list[i].state = IDLE_DG;
-				activity = 1;
-			}
-		}
-	}
-
-	while( rec_comm_active < NET_NMAXRECEIVEFRAME && !end_task )
-	{
-		for( i=0; i<NET_NMAXRECEIVEFRAME; i++ )
-		{
-			if( rec_list[i].state == IDLE_DG )
-			{
-					rec_list[i].number = Get_ControlBlock();
-					if( rec_list[i].number >= 0 )
-					{
-						rec_comm_active++;
-						rec_list[i].state = WAITING_DG;
-						if( !rec_br_comm_active )
-						{
-							rec_br_comm_active++;
-							rec_list[i].type = 1;
-						}
-						else
-							rec_list[i].type = 0;
-						rec_list[i].frame.rec = ReceiveFramePool+i;
-						ReceiveFrame( i );
-					}
-					else
-						rec_list[i].number = -1;
-			}
-		}
-	}
+		sendFrameTask();
+		receiveFrameTask();
 }
 
 #endif // NET_BAC_COMM

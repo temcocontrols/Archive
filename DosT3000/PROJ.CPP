@@ -2,14 +2,13 @@
 #include <dos.h>
 #include <process.h>
 #include <dir.h>
-//#include <sys\stat.h>
+#include <sys\stat.h>
 #include <time.h>
 #include <math.h>
 #include <stdlib.h>
 #include <graphics.h>
 #include <windows.h>
 #include "aio.h"
-#include "router.h"
 #include "baseclas.h"
 #include "recstruc.h"
 #include "mtkernel.h"
@@ -127,7 +126,7 @@ extern char station_name[NAME_SIZE];
 extern unsigned char tbl_bank[MAX_TBL_BANK];
 extern char password[9];
 
-extern char NetworkName[NAME_SIZE];
+extern char far NetworkName[NAME_SIZE];
 extern unsigned long timestart;
 
 extern char huge *trying_mess;
@@ -199,6 +198,9 @@ extern char huge *userac_text;
 extern char huge *async_text;
 extern char huge *estab_text;
 extern char huge array_miniconf[][16];
+extern char	read_inputs_rate;
+extern char write_outputs_rate;
+
 byte no_outs, no_ins;
 //char huge files[500][13];
 extern char huge (*files)[13];
@@ -2105,57 +2107,57 @@ void pnboards(GWDialog *D)
  D->GDGets(cnrboards,1,22,1,Blue,White);
 // nnr_boards=atoi(cnrboards);   //FOR THE MOMENT nr_boards=1
  D->GWPuts(1,22,itoa(nr_boards,cnrboards,10),Blue,White);
- for(int i=4;i<D->index_obj;i++)
+ for(int i=5;i<D->index_obj;i++)
  {
 	if( D->objects[i] )
 	{
 		mfarfree(D->objects[i]);
 		D->objects[i]=NULL;
-  }
+	}
  }
- D->index_obj = 4;
- D->GWPuts(5,23,"BOARD-1  BOARD-2  BOARD-3  BOARD-4",Lightgray,Black);
+ D->index_obj = 5;
+ D->GWPuts(7,23,"BOARD-1  BOARD-2  BOARD-3  BOARD-4",Lightgray,Black);
 
  lin_menu[34]=0;
- D->GWPuts(7,23,lin_menu,Lightgray,Black);
  D->GWPuts(8,23,lin_menu,Lightgray,Black);
  D->GWPuts(9,23,lin_menu,Lightgray,Black);
+ D->GWPuts(10,23,lin_menu,Lightgray,Black);
  lin_menu[34]=lin_menu[0];
 
  for(i=0;i<nnr_boards; i++)
  {
 	char p[8]={"BOARD-1"};
 	p[6]='0'+i+1;
-	D->GWPuts(5,23+i*9,p,Lightgray,White);
+	D->GWPuts(7,23+i*9,p,Lightgray,White);
  }
 
  for(i=0;i<nnr_boards; i++)
  {
-	D->GDDef_object(NULL,26+i*9,7,3,Cyan,Black,(char *)(b+i),Blue,White);
-	D->GDDef_object(NULL,23+i*9,8,6,Cyan,Black,(char *)(f+i),Blue,White);
-	D->GDDef_object(NULL,25+i*9,9,4,Cyan,Black,(char *)(s+i),Blue,White);
+	D->GDDef_object(NULL,26+i*9,8,3,Cyan,Black,(char *)(b+i),Blue,White);
+	D->GDDef_object(NULL,23+i*9,9,6,Cyan,Black,(char *)(f+i),Blue,White);
+	D->GDDef_object(NULL,25+i*9,10,4,Cyan,Black,(char *)(s+i),Blue,White);
  }
  D->index_cur = 0;
 
 
  if(ptr_panel->card_type>=VER1_CARD)
  {
-  GWDialog *D1 = new GWDialog(21,10,60,18,NO_STACK,0);
-  D1->GWSet("I/O Board Configuration",Lightgray,Darkgray);
+	GWDialog *D1 = new GWDialog(21,10,60,18,NO_STACK,0);
+	D1->GWSet("I/O Board Configuration",Lightgray,Darkgray);
 	D1->GShowWindow(DIALOG);
 
-  D1->GWPuts(2,5,"BOARD 1 : ",Lightgray,Black);
-  D1->GWPuts(3,5,"BOARD 2 : ",Lightgray,Black);
-  D1->GWPuts(4,5,"BOARD 3 : ",Lightgray,Black);
-  D1->GWPuts(5,5,"BOARD 4 : ",Lightgray,Black);
+	D1->GWPuts(2,5,"BOARD 1 : ",Lightgray,Black);
+	D1->GWPuts(3,5,"BOARD 2 : ",Lightgray,Black);
+	D1->GWPuts(4,5,"BOARD 3 : ",Lightgray,Black);
+	D1->GWPuts(5,5,"BOARD 4 : ",Lightgray,Black);
 
 	D1->GWPuts(1,15,"1 2 3 4 5 6 7 8",Lightgray,Black);
-  char p[8]={"BOARD 1"};
-  for(i=0;i<nr_boards; i++)
-  {
+	char p[8]={"BOARD 1"};
+	for(i=0;i<nr_boards; i++)
+	{
 	p[6]='0'+i+1;
 	D1->GWPuts(2+i,5,p,Lightgray,White);
-  }
+	}
 
   char c[2]={" "};
   for(i=0;i<nr_boards; i++)
@@ -2521,6 +2523,7 @@ void miniconfig(void)
 void boardconfig(void)
 {
  char cnrboards[2],cnrpanel[4],cNetworkAddress[6];
+ char inr[5], outr[5];
  int i, err=0;
  set_semaphore_dos();
  b=new char [4][4];
@@ -2540,36 +2543,42 @@ void boardconfig(void)
 // ********  1997.8.4 NO.030  ********
 // ********       begin       ********
 // ***********************************
-	GWDialog *D = new GWDialog(301,"need_help",12,6,70,17,NO_STACK,0);
+	GWDialog *D = new GWDialog(301,"need_help",12,6,70,20,NO_STACK,0);
 // ***********************************
 // ********      mao hui      ********
 // ********  1997.8.4 NO.030  ********
 // ********        end        ********
 // ***********************************
 	D->enter = 2;
-  D->GWSet("T3000 Panel Configuration",Lightgray,Darkgray);
-  D->GShowWindow(DIALOG);
+	D->GWSet("T3000 Panel Configuration",Lightgray,Darkgray);
+	D->GShowWindow(DIALOG);
 
-  D->GWPuts(1,1,"Number of PC boards: ",Lightgray,Black);
-  D->GWPuts(1,25,"Panel number  : ",Lightgray,Black);
-  D->GWPuts(2,25,"Panel name    : ",Lightgray,Black);
+	D->GWPuts(1,1,"Number of PC boards: ",Lightgray,Black);
+	D->GWPuts(1,25,"Panel number  : ",Lightgray,Black);
+	D->GWPuts(2,25,"Panel name    : ",Lightgray,Black);
 //  D->GWPuts(3,25,"Network number: ",Lightgray,Black);
-	D->GWPuts(7,1,"Base address [hexa] : ",Lightgray,Black);
-	D->GWPuts(8,1,"Quartz frequence    : ",Lightgray,Black);
-	D->GWPuts(9,1,"Watchdog interval   : ",Lightgray,Black);
-	D->GWPuts(6,1,"Board status        : ",Lightgray,Black);
+	D->GWPuts(4,1,"Read inputs rate   : ",Lightgray,Black);
+	D->GWPuts(5,1,"Write outputs rate : ",Lightgray,Black);
 
-	D->GWPuts(5,23,"BOARD-1  BOARD-2  BOARD-3  BOARD-4",Lightgray,Black);
+	D->GWPuts(9,1,"Base address [hexa] : ",Lightgray,Black);
+	D->GWPuts(10,1,"Quartz frequence    : ",Lightgray,Black);
+	D->GWPuts(11,1,"Watchdog interval   : ",Lightgray,Black);
+	D->GWPuts(8,1,"Board status        : ",Lightgray,Black);
+
+	D->GWPuts(7,23,"BOARD-1  BOARD-2  BOARD-3  BOARD-4",Lightgray,Black);
 	for(i=0;i<nr_boards; i++)
 	{
-	char p[8]={"BOARD-1"};
-	p[6]='0'+i+1;
-	D->GWPuts(5,23+i*9,p,Lightgray,White);
-	if(control && blocked1<8)
-		D->GWPuts(6,26+i*9,on,Lightgray,Black);
-	else
-		D->GWPuts(6,26+i*9,off,Lightgray,Black);
+	 char p[8]={"BOARD-1"};
+	 p[6]='0'+i+1;
+	 D->GWPuts(7,23+i*9,p,Lightgray,White);
+	 if(control && blocked1<8)
+		D->GWPuts(8,26+i*9,on,Lightgray,Black);
+	 else
+		D->GWPuts(8,26+i*9,off,Lightgray,Black);
 	}
+
+	itoa(read_inputs_rate, inr, 10);
+	itoa(write_outputs_rate, outr, 10);
 
 	itoa(Station_NUM, cnrpanel, 10);
 	itoa(NetworkAddress, cNetworkAddress, 10);
@@ -2577,16 +2586,16 @@ void boardconfig(void)
 
 	for(i=0;i<nr_boards; i++)
 	{
-	if(!boards[i].base_adr)
-	{
+	 if(!boards[i].base_adr)
+	 {
 //		 boards[i].base_adr = 100+i*8-(i/2>=1?6:0);
 		 boards[i].base_adr = 256;
 		 boards[i].quartz_freq = 7372;
 		 boards[i].watchdog_interval = 250;
-	}
-	itoa(boards[i].base_adr, b[i], 16);
-	ftoa((float)boards[i].quartz_freq/1000., 6, 3, f[i]);
-	itoa(boards[i].watchdog_interval, s[i], 10);
+	 }
+	 itoa(boards[i].base_adr, b[i], 16);
+	 ftoa((float)boards[i].quartz_freq/1000., 6, 3, f[i]);
+	 itoa(boards[i].watchdog_interval, s[i], 10);
 	}
 
 // D->GDDef_object(NULL,20,1,1,Cyan,Black,cnrboards,Blue,White);
@@ -2595,12 +2604,17 @@ void boardconfig(void)
 	D->GDDef_object(NULL,41,2,16,Cyan,Black,Station_NAME,Blue,White);
 //	D->GDDef_object(NULL,41,3,5,Cyan,Black,cNetworkAddress,Blue,White);
 
+	D->GDDef_object(NULL,23,4,2,Cyan,Black,inr,Blue,White);
+	D->GDDef_object(NULL,23,5,2,Cyan,Black,outr,Blue,White);
+
 	for(i=0;i<nr_boards; i++)
 	{
-	D->GDDef_object(NULL,26+i*9,7,3,Cyan,Black,(char *)(b+i),Blue,White);
-	D->GDDef_object(NULL,23+i*9,8,6,Cyan,Black,(char *)(f+i),Blue,White);
-	D->GDDef_object(NULL,25+i*9,9,4,Cyan,Black,(char *)(s+i),Blue,White);
+	 D->GDDef_object(NULL,26+i*9,8,3,Cyan,Black,(char *)(b+i),Blue,White);
+	 D->GDDef_object(NULL,23+i*9,9,6,Cyan,Black,(char *)(f+i),Blue,White);
+	 D->GDDef_object(NULL,25+i*9,10,4,Cyan,Black,(char *)(s+i),Blue,White);
 	}
+
+
 	keyboard_data=0;
 	no_outs = boards[0].no_outs;
 	no_ins  = boards[0].no_ins;
@@ -2690,6 +2704,10 @@ void boardconfig(void)
 		 boards[0].no_ins =no_ins;
 		 save_config( CNF_BOARD_INFO );
 		 TS = Station_NUM;
+
+		 read_inputs_rate = atoi(inr);
+		 write_outputs_rate = atoi(outr);
+
 // update info in comm_info
 //		 desinstalled();
 /*
@@ -2706,6 +2724,7 @@ void boardconfig(void)
 		}
 */
 		 save_config(CNF_COMM);
+		 save_config(CNF_IORATE);
 		 install_port();
 		}
 	 }
@@ -3331,7 +3350,7 @@ void pmore(int com)
 		 delete D;
 		 if(ok)
 		  if(check_access(12) == R_READ_WRITE)
-		  {
+			{
 			 strcpy(&pcomminfo[com].modemdata.first_init_string[0], tempbuf);
 //	 strcpy(&ModemDataBase[0].second_init_string[0], buf);
 			 number_rings=atoi(&buf[6]);
@@ -3344,7 +3363,7 @@ void pmore(int com)
 		  else
 			DisplayMessage(mode_text?18:150, mode_text?7:150, mode_text?62:510, mode_text?11:210, NULL, " Unsaved changes. Unauthorized access! ", NULL, Black, NULL, 1500);
 		 break;
-	  }
+		}
 	  case ASYNCRON_LINK:
 	  {
 		 y = pcomminfo[com].program_nr;
@@ -3358,8 +3377,8 @@ void pmore(int com)
 		 char ok=D->ok;
 		 delete D;
 		 if(ok)
-		  if(check_access(12) == R_READ_WRITE)
-		  {
+			if(check_access(12) == R_READ_WRITE)
+			{
 			 y=atoi(buf);
 //			 if(!number_rings) number_rings=1;
 			 if( y > tbl_bank[PRG] ) y=0;
@@ -3376,8 +3395,8 @@ void pmore(int com)
 				 ptr_panel->programs[y-1].com_prg=1;
 				}
 			 }
-		  }
-		  else
+			}
+			else
 			DisplayMessage(mode_text?18:150, mode_text?7:150, mode_text?62:510, mode_text?11:210, NULL, " Unsaved changes. Unauthorized access! ", NULL, Black, NULL, 1500);
 		 break;
 	  }

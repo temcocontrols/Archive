@@ -1,8 +1,6 @@
 #ifndef _ROUTER_H
 #define _ROUTER_H
 
-#include "t3000def.h"
-
 #define ESTABLISH_CONNECTION_NET  90
 #define ESTABLISH_CONNECTION_PORT 91
 

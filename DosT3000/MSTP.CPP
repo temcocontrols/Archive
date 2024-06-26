@@ -5,11 +5,10 @@
 #include <graphics.h>
 #include "aio.h"
 #include "mtkernel.h"
-#include "router.h"
 #include "serial.h"
 #include "rs485.h"
 #include "gwin.h"       
-//#include "giflzw.hpp"
+#include "giflzw.hpp"
 #include "ptp.h"
 #include "net_bac.h"
 
@@ -34,7 +33,7 @@ extern int maxelem_grouppool;
 extern int curelem_grouppool;
 extern char huge *lin_text;
 extern int NetworkAddress;
-extern char NetworkName[NAME_SIZE];
+extern char far NetworkName[NAME_SIZE];
 extern char table_crc8[256];
 
 extern Panel_info1 Panel_Info1;
@@ -97,54 +96,110 @@ int compressdata(char *dest, int length_dest, char *source, int length_source, i
 int uncompress(char *dest, int length_dest, char *source, int length_source);
 int encodetag(char cl, char t, char *tag, unsigned length);
 
+// list used by router to store the request for a diferrent network
+Point_Net             _far request_router_points_list[MAXREMOTEPOINTS82];
+NETWORK_POINTS      	_far response_router_points_list[MAXNETWORKPOINTS];
+
 extern NETWORK_POINTS	_far network_points_list[MAXNETWORKPOINTS];
 //WANT_POINTS		   want_points_list[MAXREMOTEPOINTS];
 extern REMOTE_POINTS  _far remote_points_list[MAXREMOTEPOINTS82];
+extern int remote_list_last_index_mstp, remote_list_last_index_ipx;
 extern char int_disk, int_disk1;
 
 char NotResponse,NotResponse1=1;
 char iamnewonnet, iwanttodisconnect;
 char netpointsflag=1;
+signed char wantpointsentry, wantpointsentry_router;
+signed char np_ipx_networkpoints_type, np_rs485_networkpoints_type;
+signed char wp_ipx_networkpoints_type, wp_rs485_networkpoints_type;
 int timepoints=400;
-char wantpointsentry;
-char sendtime;
+char _far sendtime, sendtime_ipx;
 int maxFrame;
 //char writeretry_flag;
 //MSTP *mstpport1;
 
 //           if time want points
+// used for ethernet port
 int sendpoints(char *asdu, char type, int port, int net) //0 want_points, 1 network_points
 {
-/*
 	class ConnectionData *cdata;
 	class Point_Net point;
-	int  i,j,k,l,length_apci;
+	int  i,j,k,l,length_apci,np;
+	REMOTE_POINTS *premote_points_list;
+
 	cdata = (class ConnectionData *)Routing_table[port].ptr;
 //	asdu += MAXAPCI;
 	i=0;
+	np=0;
 	if(type==SEND_WANTPOINTS_COMMAND)
 	{
 	 k=0;
-	 for(j=0; j<MAXREMOTEPOINTS; j++)
+	 if( rs485port==-1 ) wp_ipx_networkpoints_type=0; // only ethernet installed
+	 premote_points_list = &remote_points_list[remote_list_last_index_ipx];
+	 for(j=remote_list_last_index_ipx; j<MAXREMOTEPOINTS82; j++, premote_points_list++)
 	 {
-		if( remote_points_list[j].info.point.point_type )
+		if( !wp_ipx_networkpoints_type)
 		{
-			if(remote_points_list[j].info.point.network==cdata->panel_info1.network )
+		 if( premote_points_list->info.point.point_type )
+		 {
+			if( rs485port!=-1 )
 			{
-			 memcpy(&asdu[k+2], &remote_points_list[j].info.point, sizeof(point));
-			 k += sizeof(point);
+				if(premote_points_list->info.point.network==cdata->panel_info1.network )
+				{
+				 memcpy(&asdu[k+2], &premote_points_list->info.point, sizeof(point));
+				 k += sizeof(point);
+				 np++;
+				 if( np >= MAXREMOTEPOINTS82_FRAME)
+				 {
+					remote_list_last_index_ipx = j+1;
+					break;
+				 }
+				}
 			}
 			else
 			{
-			 if( net && remote_points_list[j].info.point.network==0xFFFF )
+			 memcpy(&asdu[k+2], &premote_points_list->info.point, sizeof(point));
+			 if( premote_points_list->info.point.network==0xFFFF )
 			 {
-				memcpy(&asdu[k+2], &remote_points_list[j].info.point, sizeof(point));
 				memcpy(&((class Point_Net*)&asdu[k+2])->network,&cdata->panel_info1.network,2);
-				k += sizeof(point);
+			 }
+			 k += sizeof(point);
+			 np++;
+			 if( np >= MAXREMOTEPOINTS82_FRAME)
+			 {
+					remote_list_last_index_ipx = j+1;
+					break;
 			 }
 			}
+		 }
+		}
+		else
+		{
+		 if( request_router_points_list[j].point_type )
+		 {
+			if(request_router_points_list[j].network==cdata->panel_info1.network )
+			{
+			 memcpy(&asdu[k+2], &request_router_points_list[j], sizeof(point));
+			 k += sizeof(point);
+
+			 if( --wantpointsentry_router < 0 ) wantpointsentry_router=0;
+			 memset(&request_router_points_list[j], 0, sizeof(Point_Net));
+			 np++;
+			 if( np >= MAXREMOTEPOINTS82_FRAME)
+			 {
+					remote_list_last_index_ipx = j+1;
+					break;
+			 }
+
+			}
+		 }
 		}
 	 }
+	 if( j >= MAXREMOTEPOINTS82)
+	 {
+		remote_list_last_index_ipx = 0;
+	 }
+	 if(++wp_ipx_networkpoints_type>=2) wp_ipx_networkpoints_type=0;
 	 memcpy(&asdu[0], &k, 2);
 	 i = k+2;
 	}
@@ -153,20 +208,48 @@ int sendpoints(char *asdu, char type, int port, int net) //0 want_points, 1 netw
 	 memcpy(&asdu[0], &cdata->panel_info1.network, 2);
 	 asdu[2] = TS;
 	 k=0;
+	 np=0;
+	 if( rs485port==-1 ) np_ipx_networkpoints_type=0; // only ethernet installed
 	 for(j=0; j<MAXNETWORKPOINTS; j++)
 	 {
+		if( !np_ipx_networkpoints_type)
+		{
 		if( network_points_list[j].info.point.point_type )
 		{
 		 if(network_points_list[j].info.point.network==cdata->panel_info1.network )
 		 {
-			memcpy(&asdu[k+5], &network_points_list[j], sizeof(NETWORK_POINTS));
-			k += sizeof(NETWORK_POINTS);
+			if( get_point_info1(&network_points_list[j].info)==SUCCESS )
+			{
+			 memcpy(&asdu[k+5], &network_points_list[j], sizeof(NETWORK_POINTS));
+			 k += sizeof(NETWORK_POINTS);
+			 np++;
+			}
+			if( --wantpointsentry < 0 ) wantpointsentry=0;
+			memset(&network_points_list[j], 0, sizeof(NETWORK_POINTS));
+			if( np >= MAXNETWORKPOINTS) break;
 		 }
 		}
+		}
+		else
+		{
+		if( response_router_points_list[j].info.point.point_type )
+		{
+		 if( response_router_points_list[j].info.point.network!=cdata->panel_info1.network )
+		 {
+			 memcpy(&asdu[k+5], &response_router_points_list[j], sizeof(NETWORK_POINTS));
+			 k += sizeof(NETWORK_POINTS);
+			 memset(&response_router_points_list[j], 0, sizeof(NETWORK_POINTS));
+			 np++;
+			 if( np >= MAXNETWORKPOINTS) break;
+		 }
+		}
+		}
 	 }
+	 if(++np_ipx_networkpoints_type>=2) np_ipx_networkpoints_type=0;
 	 memcpy(&asdu[3], &k, 2);
 	 i = k+5;
 	}
+
 	if(k)
 	{
 //	 if(type==SEND_NETWORKPOINTS_COMMAND)
@@ -174,8 +257,8 @@ int sendpoints(char *asdu, char type, int port, int net) //0 want_points, 1 netw
 	 return i;
 	}
 	return 0;
-*/
 }
+
 
 //           if time want points
 void MSTP::sendpoints(char *asdu, char type) //0 want_points, 1 network_points
@@ -183,28 +266,83 @@ void MSTP::sendpoints(char *asdu, char type) //0 want_points, 1 network_points
 // NETWORK_POINTS		*np;
  class Point_Net point;
 // char apci[MAXAPCI];
- int  i,j,k,l,length_apci;
+ REMOTE_POINTS *premote_points_list;
+ int  i,j,k,l,length_apci,np;
 	asdu += MAXAPCI;
 	i=0;
+
 	if(!type)
 	{
 	 k=0;
-	 for(j=0; j<MAXREMOTEPOINTS82; j++)
+	 np=0;
+	 if( ipxport==-1 ) wp_rs485_networkpoints_type=0; // only rs485 installed
+	 premote_points_list = &remote_points_list[remote_list_last_index_mstp];
+	 for(j=remote_list_last_index_mstp; j<MAXREMOTEPOINTS82; j++, premote_points_list++)
 	 {
 //		if( !remote_points_list[j].info.point.zero() )
-		if( remote_points_list[j].info.point.point_type )
+		if( !wp_rs485_networkpoints_type)
 		{
-//			point = remote_points_list[j].info.point;
-//			memcpy(&asdu[k+2], &point, sizeof(point));
-			if(remote_points_list[j].info.point.network==panel_info1.network ||
-				 remote_points_list[j].info.point.network==0xFFFF )
+		if( premote_points_list->info.point.point_type )
+		{
+		 if( ipxport!=-1 )
+		 {
+			if(premote_points_list->info.point.network==panel_info1.network ||
+				 premote_points_list->info.point.network==0xFFFF )
 			{
-			 memcpy(&asdu[k+2], &remote_points_list[j].info.point, sizeof(point));
+			 memcpy(&asdu[k+2], &premote_points_list->info.point, sizeof(point));
 			 memcpy(&((class Point_Net*)&asdu[k+2])->network,&panel_info1.network,2);
 			 k += sizeof(point);
+			 np++;
+			 if( np >= MAXREMOTEPOINTS82_FRAME)
+			 {
+				remote_list_last_index_mstp = j+1;
+				break;
+			 }
+			}
+		 }
+		 else
+		 {
+			 memcpy(&asdu[k+2], &premote_points_list->info.point, sizeof(point));
+			 if( premote_points_list->info.point.network==0xFFFF )
+			 {
+				 memcpy(&((class Point_Net*)&asdu[k+2])->network,&panel_info1.network,2);
+			 }
+			 k += sizeof(point);
+			 np++;
+			 if( np >= MAXREMOTEPOINTS82_FRAME)
+			 {
+				remote_list_last_index_mstp = j+1;
+				break;
+			 }
+		 }
+		}
+		}
+		else
+		{
+		if( request_router_points_list[j].point_type )
+		{
+			if(request_router_points_list[j].network==panel_info1.network )
+			{
+			 memcpy(&asdu[k+2], &request_router_points_list[j], sizeof(point));
+			 k += sizeof(point);
+
+			 if( --wantpointsentry_router < 0 ) wantpointsentry_router=0;
+			 memset(&request_router_points_list[j], 0, sizeof(Point_Net));
+			 np++;
+			 if( np >= MAXREMOTEPOINTS82_FRAME)
+			 {
+				remote_list_last_index_mstp = j+1;
+				break;
+			 }
 			}
 		}
+		}
 	 }
+	 if( j >= MAXREMOTEPOINTS82)
+	 {
+		remote_list_last_index_mstp = 0;
+	 }
+	 if(++wp_rs485_networkpoints_type>=2) wp_rs485_networkpoints_type=0;
 	 memcpy(&asdu[0], &k, 2);
 	 i = k+2;
 	}
@@ -214,21 +352,48 @@ void MSTP::sendpoints(char *asdu, char type) //0 want_points, 1 network_points
 	 memcpy(&asdu[0], &panel_info1.network, 2);
 	 asdu[2] = TS;
 	 k=0;
+	 np=0;
 //	 np = network_points_list;
+	 if( ipxport==-1 ) np_rs485_networkpoints_type=0; // only rs485 installed
 	 for(j=0; j<MAXNETWORKPOINTS; j++)
 	 {
 //		if( !network_points_list[j].info.point.zero() )
+		if( !np_rs485_networkpoints_type)
+		{
 		if( network_points_list[j].info.point.point_type )
 		{
 //		 get_point_info(&network_points_list[j].info,NULL,NULL,NULL,NULL,1, network_points_list[j].info.point.network);
 		 if( network_points_list[j].info.point.network==panel_info1.network )
+		 {
 			if( get_point_info1(&network_points_list[j].info)==SUCCESS )
 			{
 			 memmove(asdu+k+5, &network_points_list[j], sizeof(NETWORK_POINTS));
 			 k += sizeof(NETWORK_POINTS);
+			 np++;
 			}
+			if( --wantpointsentry < 0 ) wantpointsentry=0;
+			memset(&network_points_list[j], 0, sizeof(NETWORK_POINTS));
+			if( np >= MAXNETWORKPOINTS) break;
+		 }
+		}
+		}
+		else
+		{
+		// route the router network points list
+		if( response_router_points_list[j].info.point.point_type )
+		{
+		 if( response_router_points_list[j].info.point.network!=panel_info1.network )
+		 {
+			 memmove(asdu+k+5, &response_router_points_list[j], sizeof(NETWORK_POINTS));
+			 k += sizeof(NETWORK_POINTS);
+			 memset(&response_router_points_list[j], 0, sizeof(NETWORK_POINTS));
+			 np++;
+			 if( np >= MAXNETWORKPOINTS) break;
+		 }
+		}
 		}
 	 }
+	 if(++np_rs485_networkpoints_type>=2) np_rs485_networkpoints_type=0;
 	 memcpy(&asdu[3], &k, 2);
 	 i = k+5;
 	}
@@ -285,11 +450,13 @@ void MSTP::sendpoints(char *asdu, char type) //0 want_points, 1 network_points
 		else
 			msleep(8);
 */
-   }
+	 }
 //	 delay(14);
 	}
+/*
 	if(type)
 	 memset(network_points_list, 0, sizeof(network_points_list));
+*/
 	}
 }
 
@@ -791,7 +958,13 @@ void MSTP::MSTP_Master_initialize(void)
  FirstToken=0;
  timepoints=400;
  wantpointsentry = 0;
-}
+ memset(network_points_list, 0, sizeof(network_points_list));
+ wantpointsentry_router = 0;
+ memset(request_router_points_list, 0, sizeof(request_router_points_list));
+ memset(response_router_points_list, 0, sizeof(response_router_points_list));
+ wp_rs485_networkpoints_type = 0;
+ np_rs485_networkpoints_type = 0;
+ }
 
 int MSTP::MSTP_Master_node( MSTP *mstp )
 {
@@ -801,7 +974,7 @@ int MSTP::MSTP_Master_node( MSTP *mstp )
  struct isr_data_block *isr_data;
  Settings *settings;
  FRAME frame;
- char TimeOut;
+ char TimeOut, resetport;
  int n,dayofyear, countr, reply_delay;
  struct MSTP_ReceivedFrame recframe;
  PORT_STATUS_variables *ps;
@@ -823,34 +996,20 @@ int MSTP::MSTP_Master_node( MSTP *mstp )
  mstp->receivedtoken = 0;
  dayofyear=ora_current.dayofyear;
  countr = 10;
+ resetport = 700;
  while( 1 )
  {
 	 TS = Station_NUM;  //node address
 	 switch ( ps->MSTP_MASTERState ){
 		 case MSTP_MASTER_IDLE:
 // 		LostToken
-			if( ps->SilenceTimer*TIMERESOLUTION >= TNO_TOKEN )
+			if( ps->SilenceTimer*TIMERESOLUTION >= TNO_TOKEN || !resetport)
 			{
-/*
-if(!a6)
-if (mode_text)
-{
- mxyputs(2,6,"                         ");
- mxyputs(2,6,itoa(xvar++, xbuf,10));
- mxyputs(10,6,itoa(ps->SilenceTimer, xbuf,10));
- mxyputs(20,6,"Idle");
- a6 =1;
-}
-*/
-/*
-				mstp->FirstToken = 0;
-				if(mstp->panelOff)
+				if(!resetport)
 				{
-				 ps->SilenceTimer = 0;
+					resetport = 700;
+					countr=1;
 				}
-				ps->MSTP_MASTERState = MSTP_MASTER_NO_TOKEN;
-				break;
-*/
 				if(mstp->FirstToken)
 				{
 // Taiwan 11/08/97
@@ -877,7 +1036,7 @@ if (mode_text)
 				countr--;
 				if( !countr )
 				{
-				 countr = 10;
+				 countr = 3;
 				 if( ((class MSTP *)Routing_table[mstp->port_number].ptr)->port )
 				 {
 					disable();
@@ -891,34 +1050,12 @@ if (mode_text)
 					 );
 					enable();
 				 }
-/*
-				 if( ((class MSTP *)Routing_table[mstp->port_number].ptr)->port )
-				 {
-					disable();
-					delete ((class MSTP *)Routing_table[mstp->port_number].ptr)->port;
-					((class MSTP *)Routing_table[mstp->port_number].ptr)->port_status = NOT_INSTALLED;
-					((class MSTP *)Routing_table[mstp->port_number].ptr)->port = NULL;
-					enable();
-				 }
-				 if( ((class MSTP *)Routing_table[mstp->port_number].ptr)->port==NULL )
-				 {
-					((class MSTP *)Routing_table[mstp->port_number].ptr)->port =
-					 new PC8250(
-						comm_info[((class MSTP *)Routing_table[mstp->port_number].ptr)->com_port].port_name,
-					 comm_info[((class MSTP *)Routing_table[mstp->port_number].ptr)->com_port].baudrate, 'N', 8, 1,
-					 dtr, 1, DISABLE, DISABLE, DISABLE, 0, 0, comm_info[((class MSTP *)Routing_table[mstp->port_number].ptr)->com_port].int_name );
-					((class MSTP *)Routing_table[mstp->port_number].ptr)->port->isr_data->media = RS485_LINK;
-					((class MSTP *)Routing_table[mstp->port_number].ptr)->port->isr_data->port_number = mstp->port_number;
-					((class MSTP *)Routing_table[mstp->port_number].ptr)->port_status = INSTALLED;
-				 }
-*/
 				}
 
 				ps->validint = 1;
 				if(mstp->panelOff)
 				{
 				 ps->SilenceTimer = 0;
-/*				 break;*/
 				}
 				ps->MSTP_MASTERState = MSTP_MASTER_NO_TOKEN;
 				break;
@@ -954,6 +1091,7 @@ if (mode_text)
 //          ReceivedToken
 				if( recframe.Frame.Destination == TS && recframe.Frame.FrameType==Token )
 				{
+         resetport = 700;
 				 mstp->UsedToken = FALSE;
 				 if( mstp->receivedtoken == 0 )
 				 {
@@ -986,22 +1124,6 @@ if (mode_text)
 					 break;
 					}
 				 mstp->OS=recframe.Frame.Source;
-
-/*
-				 if(mstp->panelOff>0)
-				 {
-						if( mstp->panelOff != Station_NUM )
-						{
-						 mstp->station_list[mstp->panelOff-1].state = 0;
-						 mstp->station_list[mstp->panelOff-1].des_length = 0;
-						 mstp->station_list[mstp->panelOff-1].panel_type = 0;
-						 mstp->station_list[mstp->panelOff-1].version=0;
-						 mstp->panel_info1.active_panels &= ~(1l<<(mstp->panelOff-1));
-						 mstp->need_info &= ~(1l<<(mstp->panelOff-1));
-						 mstp->panelOff = -1;
-						}
-				 }
-*/
 				 if(ready_for_descriptors&0x02)
 				 {
 					 sendinfo(&frame, 0x04, Station_NUM, mstp->port_number);
@@ -1065,232 +1187,15 @@ if (mode_text)
 
 //---------
 //           send info
-/*
-				 if( mstp->laststation_connected>=0 )
-				 {
-*/
-//					if( mstp->FirstToken >= 2 )
-//					{
-/*
-// Aug 29, 1997
-						if(!newpanelon)
-						{
-//							mstp->sendinfo(&frame, TS<recframe.Frame.Source?ON|0x02:ON, Station_NUM);
-							mstp->sendinfo(&frame, ON, Station_NUM);
-							if(TS<recframe.Frame.Source)
-								mstp->sendinfo(&frame, 0x02, Station_NUM);
-						}
-						else
-						{
-//							mstp->sendinfo(&frame, TS<recframe.Frame.Source?ON|0x02|0x08:ON|0x08, Station_NUM);
-							mstp->sendinfo(&frame, ON|0x08, Station_NUM);
-							if(TS<recframe.Frame.Source)
-							mstp->sendinfo(&frame, 0x02, Station_NUM);
-						}
-//<-
-*/
-//-> Sep 05, 1997
-/*
-						if(panelOff>0)
-						{
-						 mstp->station_list[panelOff-1].state = 0;
-						 mstp->station_list[panelOff-1].des_length = 0;
-						 mstp->station_list[panelOff-1].panel_type = 0;
-						 mstp->station_list[panelOff-1].version=0;
-						 mstp->panel_info1.active_panels &= ~(1l<<(panelOff-1));
-						 mstp->need_info &= ~(1l<<(panelOff-1));
-						 panelOff = -1;
-						}
-						if(!newpanelbehind)
-						{
-//							mstp->sendinfo(&frame, TS<recframe.Frame.Source?ON|0x02:ON, Station_NUM);
-							mstp->sendinfo(&frame, ON, Station_NUM);
-							if(TS<recframe.Frame.Source)
-							{
-								delay(5);
-								mstp->sendinfo(&frame, 0x02, Station_NUM);
-							}
-						}
-						else
-						{
-//							mstp->sendinfo(&frame, TS<recframe.Frame.Source?ON|0x02|0x08:ON|0x08, Station_NUM);
-							mstp->sendinfo(&frame, ON|0x08, Station_NUM);
-							if(TS<recframe.Frame.Source)
-							{
-								delay(5);
-								mstp->sendinfo(&frame, 0x02, Station_NUM);
-							}
-						}
-//<-
-					}
-					if( --(mstp->laststation_connected) < 0 )
-					{
-//						 newpanelon=0;
-						 newpanelbehind=0;
-						 if(ready_for_descriptors&0x01)
-						 {
-							action=1;
-							if( tasks[MISCELLANEOUS].status == SUSPENDED )
-								 resume(MISCELLANEOUS);
-						 }
-					}
-*/
-/*
-				 if( mstp->laststation_connected>=0 )
-				 {
-					sendinfoflag = 1;
-					mstp->sendinfo_flag|=LASTSTCONNECTED;
-					resume(NETTASK);
-				 }
-*/
-//				 else
-//					 mstp->newpanelbehind = 0;
-
-//           if first token then broadcast information about its: system name, etc
-//				 if ( mstp->FirstToken < 2 )
-//				 {
-
-//					mstp->FirstToken++;
-//					mstp->sendinfo(&frame, TS<recframe.Frame.Source?ON|0x02:ON, Station_NUM);
-/*
-//oldcode
-					if(!newpanelon)
-					{
-						mstp->sendinfo(&frame, ON, Station_NUM);
-						if(TS<recframe.Frame.Source)
-						{
-							delay(5);
-							mstp->sendinfo(&frame, 0x02, Station_NUM);
-						}
-					}
-					else
-					{
-						mstp->sendinfo(&frame, ON|0x08, Station_NUM);
-						if(TS<recframe.Frame.Source)
-						{
-							delay(5);
-							mstp->sendinfo(&frame, 0x02, Station_NUM);
-						}
-					}
-//oldcode
-*/
-/*
-					if(!newpanelbehind)
-					{
-						mstp->sendinfo(&frame, ON, Station_NUM);
-						if(TS<recframe.Frame.Source)
-						{
-							delay(5);
-							mstp->sendinfo(&frame, 0x02, Station_NUM);
-						}
-					}
-					else
-					{
-						mstp->sendinfo(&frame, ON|0x08, Station_NUM);
-						if(TS<recframe.Frame.Source)
-						{
-							delay(5);
-							mstp->sendinfo(&frame, 0x02, Station_NUM);
-						}
-					}
-*/
-//				 }
-/*
-				 if ( mstp->FirstToken == 0 )
-				 {
-					sendinfoflag = 1;
-					mstp->sendinfo_flag|=FIRSTTOKEN;
-					resume(NETTASK);
-				 }
-*/
-
-/*
-//           if time want points and network points
-				 if(netpointsflag)
-				 {
-					mstp->sendpoints(frame.Buffer, 1);  //network points
-					netpointsflag=0;
-					timepoints = 50;
-				 }
-				 if (!timepoints )
-				 {
-					mstp->sendpoints(frame.Buffer, 0);  //want points
-					netpointsflag++;
-				 }
-*/
-//           if time want points and network points
-/*
-				 if(netpointsflag==3)
-				 {
-					 if( rs485port!=-1 )
-						 net_call(COMMAND_50, SEND_NETWORKPOINTS_COMMAND, 0, 0, 255, Routing_table[rs485port].Port.network, BACnetUnconfirmedRequestPDU,    //|NETCALL_NOTTIMEOUT,
-											 TIMEOUT_NETCALL,NULL,NULL,NULL,0,0,rs485port);
-					 memset(network_points_list, 0, sizeof(network_points_list));
-					 netpointsflag=0;
-					 wantpointsentry=0;
-					 timepoints = 40;
-				 }
-				 if(netpointsflag==1)
-				 {
-					 if(wantpointsentry)
-					 {
-						netpointsflag=2;
-						resume(NETTASK);
-					 }
-					 else
-					 {
-						netpointsflag=0;
-						timepoints = 50;
-					 }
-				 }
-				 if (!timepoints && !netpointsflag)
-				 {
-					if( rs485port!=-1 )
-						net_call(COMMAND_50, SEND_WANTPOINTS_COMMAND+(1<<8), 0, 0, 255, Routing_table[rs485port].Port.network, BACnetUnconfirmedRequestPDU,   //|NETCALL_NOTTIMEOUT,
-											 TIMEOUT_NETCALL,NULL,NULL,NULL,0,0,rs485port);
-//					resume(NETTASK);
-					netpointsflag=1;
-				 }
-*/
-
-//           if time want points and network points
-/*
-				 if(netpointsflag==3)
-				 {
-					 mstp->sendpoints(frame.Buffer, 1);  //network points
-					 netpointsflag=0;
-					 wantpointsentry=0;
-					 timepoints = 50;
-				 }
-				 if(netpointsflag==1)
-				 {
-					 if(wantpointsentry)
-					 {
-						netpointsflag=2;
-						resume(NETTASK);
-					 }
-					 else
-					 {
-						netpointsflag=0;
-						timepoints = 50;
-					 }
-				 }
-				 if (!timepoints && !netpointsflag)
-				 {
-					mstp->SendFrame(NULL);  //pad same bytes to announce its presents
-					mstp->sendpoints(frame.Buffer, 0);  //want points
-					netpointsflag=1;
-				 }
-*/
 				 if( netpointsflag )
 				 {
-					if(wantpointsentry)
+					if(wantpointsentry || wantpointsentry_router)
 					{
 						mstp->SendFrame(NULL);  //pad same bytes to announce its presents
 						mstp->sendpoints(frame.Buffer, 1);  //network points
 					}
 					netpointsflag=0;
-					wantpointsentry=0;
+//					wantpointsentry=0;
 					timepoints = 50;
 				 }
 				 if(!timepoints)
@@ -1342,16 +1247,6 @@ if (mode_text)
 				 mstp->SendFrame(&frame);
 				 mstp->FirstToken = 0;
 				 mstp->receivedpollformaster = recframe.Frame.Source;
-/*
-if(a7<2)
-if (mode_text)
-{
- mxyputs(2,7,"                         ");
- mxyputs(2,7,itoa(xvar++, xbuf,10));
- mxyputs(10,7,"PFM");
- a7++;
-}
-*/
 				 break;
 				}
 				if(mstp->receivedpollformaster==0)
@@ -1418,6 +1313,7 @@ if (mode_text)
 			if( ps->SilenceTimer < Tno_token-1 )
 			{
 				 msleep(Tno_token-ps->SilenceTimer);
+         resetport--;
 			}
 			break;
 		 case MSTP_MASTER_USE_TOKEN:
@@ -2055,7 +1951,7 @@ int encodetag(char cl, char t, char *tag, unsigned length)
 	tag[1]=length;
 	n=2;
   }
-  if( length >= 254 && length<=65535 )
+	if( length >= 254 && length<=65535 )
   {
 	tag[0]=(t<<4)+(cl<<3)+0x05;
 	tag[1]=254;
@@ -2088,7 +1984,7 @@ int decodetag(char *tag, unsigned int *length)
 	return n;
 }
 
-//char xxxx;
+char xxxx;
 
 int ClientTransactionStateMachine(
 			 ServicePrimitive Event,  int Service, FlowControl flowcontrol, int network,
@@ -3599,42 +3495,71 @@ if (mode_text)
 				{
 				 if( length_asdu-n > 0 )
 				 {
+					// received a list the points requested be other panels
 					if(extralow==SEND_WANTPOINTS_COMMAND) //get want points
 					{
 					 Point_Net *wantpoints;
 					 memcpy(&n, asdu, 2);
 					 n /= sizeof(Point_Net);
 					 wantpoints = (Point_Net *)(asdu+2);
-					 if(wantpointsentry!=2)
+//					 if(wantpointsentry!=2)
 						for(int i=0; i<n && i<MAXREMOTEPOINTS82 ; i++, wantpoints++)
 						{
-						 if(wantpoints->network == cdata->panel_info1.network && wantpoints->panel+1 == cdata->panel_info1.panel_number )
+						 if( wantpoints->network == cdata->panel_info1.network )
 						 {
-							wantpointsentry=1;
-							for(j=0; j<MAXNETWORKPOINTS; j++)
+							if( wantpoints->panel+1 == cdata->panel_info1.panel_number )
 							{
-							 if(*wantpoints==network_points_list[j].info.point) break;
-							}
-							if( j>=MAXNETWORKPOINTS )
-							{
+//							wantpointsentry=1;
 							 for(j=0; j<MAXNETWORKPOINTS; j++)
 							 {
-								if(!network_points_list[j].info.point.point_type)
+								if(*wantpoints==network_points_list[j].info.point) break;
+							 }
+							 if( j>=MAXNETWORKPOINTS )
+							 {
+								for(j=0; j<MAXNETWORKPOINTS; j++)
 								{
-								 network_points_list[j].info.point = *wantpoints;
-								 break;
+								 if(!network_points_list[j].info.point.point_type)
+								 {
+									network_points_list[j].info.point = *wantpoints;
+									wantpointsentry++;
+									break;
+								 }
 								}
 							 }
 							}
 						 }
-					  }
+						 else
+						 {
+							if( rs485port!=-1 && ipxport!=-1 )
+							{
+							 for(j=0; j<MAXREMOTEPOINTS82; j++)
+							 {
+								if(*wantpoints==request_router_points_list[j]) break;
+							 }
+							 if( j>=MAXREMOTEPOINTS82 )
+							 {
+								for(j=0; j<MAXREMOTEPOINTS82; j++)
+								{
+								 if(!request_router_points_list[j].point_type)
+								 {
+									request_router_points_list[j] = *wantpoints;
+									wantpointsentry_router++;
+									break;
+								 }
+								}
+							 }
+							}
+						 }
+						}
 					}
+					// resceived response from the panels
 					if(extralow==SEND_NETWORKPOINTS_COMMAND)
 					{
 					 NETWORK_POINTS	*networkpoints, pinfo;
 					 Point_info	 	*info;
-					 int net;
+					 int net, net1;
 					 char panel, des_label;
+					 net1 = cdata->panel_info1.network;
 					 memcpy(&net, asdu, 2);
 					 asdu += 2;
 					 panel = *asdu++;
@@ -3646,14 +3571,17 @@ if (mode_text)
 						memcpy(&pinfo,networkpoints,sizeof(NETWORK_POINTS));
 						if(rs485port==port)
 						{
-							pinfo.info.point.network = 0xFFFF;
+								pinfo.info.point.network = 0xFFFF;
 						}
 						else
 						 if(ipxport==port)
 						 {
 							if(rs485port==-1)
-							 pinfo.info.point.network = 0xFFFF;
+							{
+								 pinfo.info.point.network = 0xFFFF;
+							}
 						 }
+
 						for(j=0; j<MAXREMOTEPOINTS82; j++)
 						{
 						 info = &remote_points_list[j].info;
@@ -3669,6 +3597,24 @@ if (mode_text)
 							 info->point.network = net;
 //							break;
 							}
+						 if( rs485port!=-1 && ipxport!=-1 )
+						 {
+							 for(int k=0; k<MAXNETWORKPOINTS; k++)
+							 {
+								if( networkpoints->info.point==response_router_points_list[k].info.point ) break;
+							 }
+							 if( k>=MAXNETWORKPOINTS )
+							 {
+								for(k=0; k<MAXNETWORKPOINTS; k++)
+								{
+								 if(!response_router_points_list[k].info.point.point_type)
+								 {
+									memcpy((void *)&response_router_points_list[k], (void *)networkpoints, sizeof(NETWORK_POINTS));
+  								break;
+								 }
+								}
+							 }
+						 }
 						}
 
 					 }
@@ -3837,6 +3783,7 @@ if(entrytimeout<0)
  {
 	if( PTRtable->state >= 32 )
 	{
+xxxx++;
 	 PTRtable->state -= 32;
 	 entrytimeout=-1;
 	 postponed=1;
@@ -4077,7 +4024,7 @@ if(entrytimeout<0)
 			  apci[0] = (BACnetAbortPDU<<4)|1;
 			  apci[1] = STSM_InvokeID;
 			  apci[2] = INVALIDAPDUINTHISSTATE;
-			  length_apci = 3;
+				length_apci = 3;
 				networklayer( N_UNITDATArequest, NORMALmessage, network, source, destination, NULL, 0, apci, length_apci, BACnetDataNotExpectingReply);
 			  ServerTSMTable.free(  current);
 			  next=0;
@@ -4451,10 +4398,13 @@ if(entrytimeout<0)
 			  }
 			}
 */
+if(xxxx++==2)
+	xxxx = 3;
+
 			if	(PTRtable->timeout<=0 && entrytimeout>=0	)
 			{                            		 //timeout waiting for PDU
-			  if(	PTRtable->retrycount++ < 1 )   //1
-			  {                               //retry count not exceed
+				if(	PTRtable->retrycount++ < 1 )   //1
+				{                               //retry count not exceed
 				ServerTSMTable.resetsegments(current);
 				while( ++PTRtable->noseg <= PTRtable->windowsize && STSM_State==STSM_SEGMENTING_RESPONSE)
 				{
@@ -5674,7 +5624,6 @@ class ConnectionData *cdata;
  }
 }
 
-
 int checkTSMtimeout(int update)
 {
  int	n = 10000;
@@ -5697,7 +5646,7 @@ int checkTSMtimeout(int update)
 			if( ServerTSMTable.table[i].timeout < 0 ) ServerTSMTable.table[i].timeout = 0 ;
 		 }
 		}
-		n=0;
+//		n=0;
 	 }
 	}
 	return n;
@@ -5719,6 +5668,7 @@ void ServerTSM(void)
 		{
 		 if( ServerTSMTable.table[i].timeout <= 0 )
 		 {
+			j = i;
 			ServerTransactionStateMachine( 0, 0, 0, 0, apdu, 0, i);
 		 }
 		}

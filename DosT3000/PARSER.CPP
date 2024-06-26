@@ -1,4 +1,3 @@
-#include <windows.h>
 //  atof
 
 /* main parser file for little C interpreter */
@@ -9,6 +8,7 @@
 //#include <stdlib.h>
 //#include <string.h>
 //#include "stdio.h"
+#include <windows.h>
 #include "baseclas.h"
 #include "gedit.h"
 #include "parser.h"
@@ -35,14 +35,12 @@ extern int error;
 extern char *pmes;
 extern unsigned line_value;
 extern long long_line_value;
-
-/*
 extern struct var_type {
  char var_name[32] ;
  enum variable_type var_type ;
  int value ;
  } global_vars[NUM_GLOBAL_VARS] ;
-*/
+
 extern struct func_type {
 	char func_name[32] ;
 	char *loc;

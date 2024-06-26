@@ -27,7 +27,7 @@ typedef struct {
 	long               baudrate;
 	unsigned int   connection:4;
 	unsigned int     activate:4;
-	struct ModemCapabilities modemdata;
+	ModemCapabilities modemdata;
 	char                  rings;
    char             program_nr;
    int                  unused;

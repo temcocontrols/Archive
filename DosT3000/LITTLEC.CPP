@@ -3,7 +3,7 @@
 extern void *newalloc(long size);
 extern void newdelete(void *ptr);
 #include <graphics.h>
-//#include <setjmp.h>
+#include <setjmp.h>
 #include <math.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -12,7 +12,6 @@ extern void newdelete(void *ptr);
 #include <alloc.h>
 #include <graphics.h>
 #include <windows.h>
-#include "router.h"
 #include "t3000def.h"
 #include "mtkernel.h"
 #include "aio.h"
@@ -89,7 +88,7 @@ float ttime;
 unsigned long ttimed;
 char *prog ;
 char *p_buf;
-//jmp_buf e_buf ;
+jmp_buf e_buf ;
 
 FILE *fp;
 char null_buf[10],cod_line[150],label[9];
@@ -804,7 +803,8 @@ char *islabel(char *token,int *num_point,byte *var_type,byte *point_type, int *n
 char *ispoint(char *token,int *num_point,byte *var_type, byte *point_type, int *num_panel, int *num_net, int network, byte panel, int *netpresent)
 {
 int i,j,k,l;
-char pc[11],*p,*q,buf[21];
+char pc[11],*p,*q,buf[21],*tok;
+			 tok = token;
 			 if(netpresent) *netpresent = 0;
 			 *num_net = network;
 			 if(strlen(token)==0) return 0;
@@ -846,7 +846,7 @@ char pc[11],*p,*q,buf[21];
 				memcpy(pc,q,p-q);
 				pc[p-q]=0;
 				for(k=OUT;k<=AY;k++)
-				  if(k!=DMON)
+					if(k!=DMON)
 					 if (!strcmp(pc,ptr_panel->info[k].name))
 						 break;
 				if (k<=AY)
@@ -860,15 +860,16 @@ char pc[11],*p,*q,buf[21];
 //												fprintf(pmes,"error line %d\n",line);
 												error=TRUE;return 0;
 												}
-					else  if ((strlen(p)==1) && (*p=='0')) {
-																									memcpy(pmes,"error line : ",13);
-																									pmes += 13;
-																									itoa(lline,pmes,10);
-																									pmes += strlen(pmes);
-																									*pmes++ = 0x0d;
-//																									fprintf(pmes,"error line %d\n",line);
-																									error=TRUE;return 0;
-																									}
+					else  if ((strlen(p)==1) && (*p=='0'))
+								{
+									memcpy(pmes,"error line : ",13);
+									pmes += 13;
+									itoa(lline,pmes,10);
+									pmes += strlen(pmes);
+									*pmes++ = 0x0d;
+//								fprintf(pmes,"error line %d\n",line);
+									error=TRUE;return 0;
+									}
 								else {
 											for(l=0;l<strlen(p);l++)
 												 if (p[l]<'0' || p[l]>'9')
@@ -878,14 +879,21 @@ char pc[11],*p,*q,buf[21];
 											else
 													 {
 //														itoa(panel,buf,10);
-														itoa(*num_panel,buf,10);
+                            buf[0] = 0;
+														if(netpresent)
+															if(*netpresent)
+															{
+																itoa(*num_net,buf,10);
+     															strcat(buf,".");
+															}
+														itoa(*num_panel,&buf[strlen(buf)],10);
 														*num_point=atoi(p);
 														*point_type = k;
 														if(*num_panel<10 || *num_point<100)
 															strcat(buf,"-");
 														strcat(buf,pc);
 														strcat(buf,p);
-														strcpy(token,buf);
+														strcpy(tok,buf);
 														if((p=look_label(*num_panel,k,*num_point,*num_net)) != NULL)
 															 {
 																*var_type = LABEL_VAR;
@@ -894,7 +902,7 @@ char pc[11],*p,*q,buf[21];
 														else
 															 {
 																*var_type = POINT_VAR;
-																return token;
+																return tok;
 															 }
 													 }
 										 }
@@ -968,16 +976,17 @@ char *look_label(int panel, int point_type, int num, int network)
 
 int find_var_def(char *var_name)
 {
- int i,j,num_net,num_panel,num_point;
+ int i,j,num_net,num_panel,num_point,k;
  byte point_type,var_type;
  var_type = 0;
- ispoint(var_name,&num_point,&var_type, &point_type,&num_panel,&num_net,pedit->network,pedit->panel);
+ k = 0;
+ ispoint(var_name,&num_point,&var_type, &point_type,&num_panel,&num_net,pedit->network,pedit->panel, &k);
  for (i=0; i<index_vars_table; i++)
 		if(!strcmp(vars_table[i].name , var_name))
 		{
-		  cur_index = i;
+			cur_index = i;
 /*
-		  for(j=0;j<MAX_ATTRIB;j++)
+			for(j=0;j<MAX_ATTRIB;j++)
 				if (vars_table[i].scope[j].line == lline)
 				{
 					 cur_scope = j;

@@ -21,7 +21,6 @@
 #include <stdlib.h>
 
 #include <windows.h>
-#include "router.h"
 #include "t3000def.h"
 #include "baseclas.h"
 #include "gwin.h"
@@ -82,6 +81,7 @@
 #define CNF_RINGS            CNF_CONSOLE+1
 #define CNF_STATION_LIST     CNF_RINGS+1
 #define CNF_IND_PASS         CNF_STATION_LIST+MAX_STATIONS*sizeof(Station_point)
+#define CNF_IORATE_OFF       CNF_IND_PASS+sizeof(Password_point)*MAX_PASSW
 
 //#define CNF_MODEM_12         CNF_COMM_INFO+3*sizeof(Comm_Info)
 //#define CNF_PROGRAM_PATH_12  CNF_MODEM_12+sizeof(ModemCapabilities)
@@ -110,6 +110,7 @@ extern int netcall(BACnetPDU pdutype, int service, int network, int dest, char *
 extern struct remote_local_list  remote_local_list[MAXREMOTEPOINTS];
 //extern int ind_remote_local_list;
 extern REMOTE_POINTS  _far remote_points_list[MAXREMOTEPOINTS82];
+extern char remote_points_OUT;
 //extern WANT_POINTS  	   want_points_list[MAXREMOTEPOINTS];
 
 extern char IPX_enabled;
@@ -167,7 +168,7 @@ int setregister(int set);
 extern int localnetwork(int net);
 
 
-extern char sendtime;
+extern char _far sendtime, sendtime_ipx;
 extern char month_days[12];
 extern rgb *grp_current_pal;
 extern char int_disk1;
@@ -190,7 +191,7 @@ extern IPX         *pipx;
 extern int NET_EXIT;
 #endif
 
-extern char NetworkName[16];
+extern char far NetworkName[16];
 extern int time_run_MSTP;
 extern long timesave;
 extern int mouse_inst;
@@ -248,8 +249,8 @@ char huge *ok_button    =" < OK > ";
 char huge *cancel_button="<Cancel>";
 char huge *exit_button    =" <eXit> ";
 char huge *noexit_button  ="<No exit>";
-char huge *version ="2.51";
-int Version = 251;    //2.24
+char huge *version ="2.59";    // May 14, 19998
+int Version = 259;    //2.56
 int cnf_version;
 
 char huge *loadpanel_text ="Load panel ";
@@ -308,6 +309,9 @@ unsigned long Active_Panels;
 char Panel_Type = T3000;
 char Station_NAME[NAME_SIZE]="PANEL1";
 int  Station_NUM=1;
+
+char read_inputs_rate;
+char write_outputs_rate;
 
 int local_panel;
 int simulator;
@@ -688,7 +692,7 @@ int minioperations(void);
 int savenetwork(void);
 int mini_operations(Panel_info1 *panel_info, char *fname=NULL, int arg=0);
 
-extern void save_config(int what);
+void save_config(int what);
 
 extern void pdate(GWDialog *D);
 extern void ptime(GWDialog *D);
@@ -2500,7 +2504,7 @@ int proj()
 	input_buffer=inp_buffer;
 	if( simulate || def_macro )
 	{
-	  mfarmalloc((char far **)&ptr_input_buffer, sizeof(struct input_buffer)*MAX_INPUT_BUFFER);
+		mfarmalloc((char far **)&ptr_input_buffer, sizeof(struct input_buffer)*MAX_INPUT_BUFFER);
 	  input_buffer=ptr_input_buffer;
 	}
 	if(simulate)
@@ -2528,7 +2532,7 @@ int proj()
 			fseek(fhandle,CNF_STATION_NUM,SEEK_SET);
 			fread(&Station_NUM, 2, 1, fhandle);
 			fread(Station_NAME, 16, 1, fhandle);
-		  fread(&NetworkAddress, 1, 2, fhandle);
+			fread(&NetworkAddress, 1, 2, fhandle);
 			fread(&NetworkName, 16, 1, fhandle);
 
 			fread(&nr_boards, 2, 1, fhandle);
@@ -2555,10 +2559,18 @@ int proj()
 				fseek(fhandle,n-sizeof(Comm_Info),SEEK_CUR);
 			 }
 			}
-			fread(&IPX_enabled, 1, 1, fhandle);  
+			fread(&IPX_enabled, 1, 1, fhandle);
 //		 fread(&ModemDataBase[0], sizeof(ModemCapabilities), 1, fhandle);
 //		 fseek(fhandle,CNF_NETWORK_NUMBER,SEEK_SET);
 //		 fread(&NetworkAddress, 1, 2, fhandle);
+
+			if(cnf_version > 255)
+			{
+			 fseek(fhandle,CNF_IORATE_OFF,SEEK_SET);
+			 fread(&read_inputs_rate, 1, 1, fhandle);
+			 fread(&write_outputs_rate, 1, 1, fhandle);
+			}
+
 			fclose(fhandle);
 //		 strcpy(station_list[Station_NUM-1].name,Station_NAME);
 		 }
@@ -2566,15 +2578,15 @@ int proj()
 		 {
 			fclose(fhandle);
 			DisplayMessageT(10, 7, 70, 11, NULL, " Old configuration file! Created a new one. ",NULL, Black, NULL, 4000);
-		  init_boards_struct();
+			init_boards_struct();
 		 }
 	 }
 	 else
 	 {
 		 fclose(fhandle);
-     remove("config.cnf");
+		 remove("config.cnf");
 		 init_boards_struct();
-   }
+	 }
 	}
 	else
 	{
@@ -2594,7 +2606,7 @@ int proj()
 	memcpy(Panel_Info1.network_name, NetworkName, sizeof(Panel_Info1.network_name));
 	memcpy(Panel_Info1.panel_name, Station_NAME, sizeof(Panel_Info1.panel_name));
 	Panel_Info1.active_panels = (1L<<(Station_NUM-1));
-  panel_info1 = Panel_Info1;
+	panel_info1 = Panel_Info1;
 #endif
 #ifdef WORKSTATION
 	strcpy(station_name, "Station 1       ");
@@ -2616,7 +2628,7 @@ int proj()
 		 fseek(fhandle,CNF_STATION_LIST,SEEK_SET);
 
 		 {
-		  fread(station_list,sizeof(Station_point),MAX_STATIONS,fhandle);
+			fread(station_list,sizeof(Station_point),MAX_STATIONS,fhandle);
 		 }
 		 fread(&passwords.ind_passwords,2,1,fhandle);
 		 fread(passwords.passwords,sizeof(Password_point),passwords.ind_passwords,fhandle);
@@ -4647,9 +4659,9 @@ int updateremotepoint(Point_Net point, int network)
 	 {
 	  break;
 	 }
-  }
-  if(j==MAXREMOTEPOINTS82)
-  {
+	}
+	if(j==MAXREMOTEPOINTS82)
+	{
 	for(j=0;j<MAXREMOTEPOINTS82;j++)
 	{
 	 if( remote_points_list[j].info.point.zero() )
@@ -4658,6 +4670,7 @@ int updateremotepoint(Point_Net point, int network)
 		remote_points_list[j].info.point=point;
 		remote_points_list[j].state = REMOTE_OK;
 		remote_points_list[j].read = 1;
+    remote_points_OUT++;
 		break;
 	 }
 	}
@@ -4698,8 +4711,9 @@ void deleteremotepoint(Point_Net point, int network)
 //		 remote_points_list[j].info.point.setzero();
 //		 want_points_list[j].point.setzero();
 //		 want_points_list[j].destination = 255;
+     remote_points_OUT--;
 	 }
-  }
+	}
 }
 
 void updateremotepoints(int ind_remote_local_list, struct remote_local_list *remote_local_list)
@@ -6245,6 +6259,7 @@ void setup(void)
 					if(i)
 					{
             sendtime = 1;
+						sendtime_ipx = 1;
 						updatetimevars();
 					}
 				 }
@@ -7612,8 +7627,17 @@ void save_config(int what)
 	 {
 		 fseek(h,CNF_IND_PASS,SEEK_SET);
 		 fwrite(&passwords.ind_passwords,2,1,h);
-		 fwrite(passwords.passwords,sizeof(Password_point),passwords.ind_passwords,h);
+ //		 fwrite(passwords.passwords,sizeof(Password_point),passwords.ind_passwords,h);
+		 fwrite(passwords.passwords,sizeof(Password_point),MAX_PASSW,h);
 	 }
+
+	 if( what & CNF_IORATE )
+	 {
+		 fseek(h,CNF_IORATE_OFF,SEEK_SET);
+		 fwrite(&read_inputs_rate,1,1,h);
+		 fwrite(&write_outputs_rate,1,1,h);
+	 }
+
 	 fclose(h);
 
 	clear_semaphore_dos();
@@ -7991,7 +8015,7 @@ int sendtoprint(void)
  else
  {
 	set_semaphore_dos();
-	if((f=fopen("point.txt","rt"))==NULL)
+	if((f=fopen("point.txt","rt"))!=NULL)
 	{
 //		mxyputs(30,10,"Not busy.\n",Lightgray,Black);
 //		delay(DELAY_TIME);
@@ -8006,11 +8030,12 @@ int sendtoprint(void)
 		clear_semaphore_dos();
 		return 0;
 	 }
-	 fclose(f);
+	 fseek(f, 0, SEEK_SET	);
+//	 fclose(f);
 	}
-	if((f=fopen("point.txt","rt"))==NULL)
+	else
 	{
-		mxyputs(30,10,"Can't open file error.",Lightgray,Black);
+		mxyputs(30,10,"Open file error!",Lightgray,Black);
 		delay(DELAY_TIME);
 		lin_text[22]=0;
 		mxyputs(30,10,lin_text,White,White);

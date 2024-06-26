@@ -114,7 +114,7 @@
 #define MAX_MONSET             1
 //#define MAX_USERS
 //#define MAX_DST
-#define PROGRAM_SIZE       10000
+#define PROGRAM_SIZE       14336       // 14K
 #define PROGRAM_SIZE_MINI   8000
 #define ALARM_MESSAGE_SIZE    58
 
@@ -244,18 +244,21 @@
 #define R_IND         0x03
 
 #define CNF_BOARD_INFO   0x01
-#define CNF_COMM			 0x02
+#define CNF_COMM			   0x02
 #define CNF_MODEM_INFO   0x04
 #define CNF_PATH_INFO    0x08
 #define CNF_CONSOLE_INFO 0x10
 #define CNF_PASS_INFO    0x20
 #define CNF_STATION_INFO 0x40
-#define CNF_ALL          0x7F
+#define CNF_IORATE			 0x0080
+
+#define CNF_ALL          0x7FFF
 
 
 #define MAXNETWORKPOINTS  30
 #define MAXREMOTEPOINTS   30
-#define MAXREMOTEPOINTS82 82
+#define MAXREMOTEPOINTS82 256    // 82
+#define MAXREMOTEPOINTS82_FRAME 82
 
 #define MAX_NEST_GRP 10
 #define MAX_FILE_TRANSFER_BUF 10002
@@ -582,7 +585,7 @@ typedef struct {
 	  long                     time_modem;
 	} PORT_STATUS_variables;
 
-//#include "router.h"
+#include "router.h"
 
 typedef struct {
 	unsigned status    :4;

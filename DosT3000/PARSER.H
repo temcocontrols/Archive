@@ -1,7 +1,6 @@
 // available 0x88-0x9B
 //
 
-#include "t3000def.h"
 #define NAME 100
 
 #define MAX_OP				10

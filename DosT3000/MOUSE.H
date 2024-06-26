@@ -6,8 +6,9 @@
 
 #ifndef _MOUSE.H
 #define _MOUSE.H
-#include <conio.h>
+
 #include <stdlib.h>
+#include <conio.h>
 #include <stdio.h>
 #include <dos.h>
 #include <bios.h>

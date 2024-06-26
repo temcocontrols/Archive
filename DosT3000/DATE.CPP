@@ -1,6 +1,5 @@
 #include <windows.h>
 #include "fxengine.h"
-#include "router.h"
 #include "t3000def.h"
 #include "graph.h"
 #include "gedit.h"
@@ -263,12 +262,15 @@ int worktime;
 NETWORK_POINTS _far	network_points_list[MAXNETWORKPOINTS];
 //WANT_POINTS		   want_points_list[MAXREMOTEPOINTS];
 REMOTE_POINTS _far remote_points_list[MAXREMOTEPOINTS82];
+char remote_points_OUT;
+int remote_list_last_index_mstp, remote_list_last_index_ipx;
+
 char int_disk, int_disk1;
 
 ROUTING_TABLE Routing_table[MAX_Routing_table];
 int networkaddress;
 int NetworkAddress=1;
-char NetworkName[NAME_SIZE]={'N','E','T','W','O','R','K','1',0};
+char far NetworkName[NAME_SIZE]={'N','E','T','W','O','R','K','1',0};
 
 Str_tbl_point custom_tab[MAX_TABS];
 

@@ -2,15 +2,6 @@
 
 #define _MTKERNEL_H
 
-#include "t3000def.h"
-
-/*
-#define ROSE
-#ifdef ROSE
-#define interrupt
-#endif
-*/
-
 #define COD386
 
 #ifdef __cplusplus
@@ -138,7 +129,6 @@ typedef struct {
 	unsigned   *pending;
 	int        sleep;
 	unsigned   pri;
-	unsigned   mode;
 	long       delay_time;
 	PORT_STATUS_variables *ps;
 	} task_struct;

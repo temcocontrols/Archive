@@ -5,13 +5,13 @@
 // be compile and linked with any program wanting to use the class.
 
 #include <alloc.h>
-//#include <ctype.h>
 #include <windows.h>
 #include <graphics.h>
 #include <conio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "t3000def.h"
 #include "portable.h"
 #include "rs232.h"

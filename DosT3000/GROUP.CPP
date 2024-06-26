@@ -67,6 +67,7 @@ extern Pshape CHECK;
 extern Pshape CROSS;
 extern Pshape GLOVE;
 
+extern char remote_points_OUT;
 extern char	 NotResponse1;
 extern char maxtbl;
 extern int ipxport, rs485port;
@@ -124,7 +125,7 @@ extern Point_Net current_opened_grp;
 extern char control;
 extern byte serial_access;
 
-extern char gpointname[11];
+extern char gpointname[17];
 extern int network_select, network_sel_tmp;
 extern int panel_select, panel_sel_tmp;
 
@@ -406,9 +407,9 @@ Control_group_block::~Control_group_block()
 print_des(Str_grp_element *group_element, Str_grp_work_data *grp_workdata, byte panel, int network, char len = 0)
 {
 //					 HANDLE handle;
-					 char buf1[11],buf[41],*des=NULL,*label=NULL,*ontext=NULL,*offtext=NULL;
+					 char buf1[17],buf[41],*des=NULL,*label=NULL,*ontext=NULL,*offtext=NULL;
 					 byte var_type,point_type;
-					 int num_net,color,num_point,num_panel;
+					 int num_net,color,num_point,num_panel,k;
 					 Point_Net *p;
 					 Point_info point_info;
 					 point_info = group_element->point_info;
@@ -451,7 +452,8 @@ print_des(Str_grp_element *group_element, Str_grp_work_data *grp_workdata, byte 
 							}
 							p = &point_info.point;
 							pointtotext(buf1,p);
-							label=ispoint(rtrim(buf1),&num_point,&var_type, &point_type, &num_panel, &num_net, network, panel);
+							k=0;
+							label=ispoint(rtrim(buf1),&num_point,&var_type, &point_type, &num_panel, &num_net, network, panel, &k);
 							if(Des)
 							{
 								if(point_type!=CON && point_type!=TBL)
@@ -1723,7 +1725,7 @@ asm push es;
 	 {                            //nu exista elementul
 		 if(screen_access==R_READ_WRITE)
 		 {
-			char test,ptr[11];
+			char test,ptr[17];
 			byte var_type,point_type;
 			int onet,num_net,num_point,num_panel; //,r=SUCCESS;
 
@@ -2247,7 +2249,7 @@ asm pop es;
 
 int grp_proc(int current_point, byte panel, int network, int call_type, GGrid *pgrid = NULL)
 {
- char buf[16],*p;
+ char buf[17],*p;
  uint i;
  int r,ctype, loc_panel;
  char point_type, var_type;
@@ -2264,7 +2266,7 @@ int grp_proc(int current_point, byte panel, int network, int call_type, GGrid *p
 		num_point = current_point;
 		current_point--;
 		current_panel = panel;
-    current_net   = network;
+		current_net   = network;
 		while(1)
 		{
 //		 call_type=0;
@@ -2676,7 +2678,7 @@ uint cell(uint hx, uint hy, Str_grp_element *group_element, Str_grp_work_data *g
  uint nrfiles, nrdirectories;
  byte p_type;
  int lat,lung,height;
- char avalue[15];
+ char avalue[17];
  avalue[0] = 0;
  if (group_element->point_info.description_label==7)
  {
@@ -3264,7 +3266,7 @@ new_elem(int curcol,int curline,int index_cur, byte panel, int network, int curr
 	int lung=textheight("H");
 	Str_grp_element *pgrp;
 
-			char ptr[11],test;
+			char ptr[17],test;
 			int num_net, lx,ly,rx,ry,num_point,num_panel;
 			byte var_type,point_type;
 
@@ -5483,14 +5485,14 @@ void memsize(void)
 							xbuf[0]=0;
 							if( Routing_table[0].ptr )
 							{
-							  itoa( ((Header_pool *)(	((Serial *)Routing_table[0].ptr)->ser_pool.buf ))->length
-								  ,xbuf,10);
+								itoa( ((Header_pool *)(	((Serial *)Routing_table[0].ptr)->ser_pool.buf ))->length
+									,xbuf,10);
 							}
 						 strcat(xbuf,"  ");
 							if( Routing_table[1].ptr )
 							{
-							  itoa( ((Header_pool *)(	((Serial *)Routing_table[1].ptr)->ser_pool.buf ))->length
-								  ,&xbuf[strlen(xbuf)],10);
+								itoa( ((Header_pool *)(	((Serial *)Routing_table[1].ptr)->ser_pool.buf ))->length
+									,&xbuf[strlen(xbuf)],10);
 							}
 						 strcat(xbuf,"  ");
 						 for(int i=0; i<MAXServerTSMTable; i++)
@@ -5506,6 +5508,12 @@ void memsize(void)
 //						 mxyputs(35,2,ltoa(core,xbuf,10));
 //						 mxyputs(3,3,"     Large mem: ");
 //						 mxyputs(20,3,ltoa(nr,xbuf,10));
+							Delay(1000);
+							if(D) DeleteMessage(D);
+              D = NULL;
+							strcpy(xbuf,"Remote points OUT: ");
+							itoa(remote_points_OUT,&xbuf[strlen(xbuf)],10);
+							DisplayMessageT(17, 10, 63, 14, NULL, xbuf,&D);
 						 }
 						 else
 						 {

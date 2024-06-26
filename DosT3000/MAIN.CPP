@@ -86,6 +86,7 @@ char huge stack_MSTP_Master_node[stack_MSTP_Master_node_SIZE*RS485TASKS];
 char huge stack_ServerTSM[stack_ServerTSM_SIZE];
 char huge stack_PTP[stack_PTP_SIZE*RS232TASKS];
 
+void interrupt ( *oldhandler)(__CPPARGS);
 //void interrupt ( *oldhandler_mouse)(__CPPARGS);
 
 //extern "C" void setcallback(void);
@@ -102,7 +103,7 @@ char huge stack_NETWORK[stack_NETWORK_SIZE];
 
 /* Timer interrupt task sheduller */
 //static unsigned pri,i,j;
-unsigned char *ptr_dos_flag;
+//unsigned char *ptr_dos_flag;
 int xscreen=10, yscreen=10;
 int dxscreen=1, dyscreen=0;
 
@@ -174,11 +175,11 @@ void (*real_oldHandler)(void);
 
 task_struct tasks[NUM_TASKS];
 unsigned  read_mon_flag = 0; // i/o semaphore
-unsigned  io_out = 0; // i/o semaphore
-unsigned  io_out_host = 0;
-unsigned  serial_wait[2] = { 0, 0 }; // i/o semaphore
+unsigned  dos_flag = 0; // i/o semaphore
+unsigned  dos_host = 0;
+//unsigned  serial_wait[2] = { 0, 0 }; // i/o semaphore
 unsigned  screen = 0; // i/o semaphore
-unsigned  memory = 0; // i/o semaphore
+//unsigned  memory = 0; // i/o semaphore
 unsigned  t3000_flag = 0; // i/o semaphore
 unsigned  print_sem = 0; // i/o semaphore
 

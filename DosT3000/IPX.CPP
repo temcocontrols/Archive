@@ -187,6 +187,7 @@ int IPX::IpxListenForPacket( byte ecb_index, byte frame_index, uint socket )
 	real_data_regs.SI.w = ecb_index*sizeof(IpxControlBlock);
 	real_data_regs.CS = Ipx_segment_call;
 	real_data_regs.IP = Ipx_offset_call;
+
 	if( !IpxCall( &real_data_regs ) )
 		return real_data_regs.AX.r.l;
 	else
@@ -214,14 +215,18 @@ int IPX::IpxSendPacket( byte ecb_index, char *packet, uint socket, uint length, 
 	ecb_ptr->FragmentDescriptor[0].Ptr = MK_FP( real_array_DS, FP_OFF(header_ptr) );
 	ecb_ptr->FragmentDescriptor[0].Length = sizeof(IpxHeader);
 	/*  real mode pointer to FRAME */
-	ecb_ptr->FragmentDescriptor[1].Ptr = MK_FP( real_Send_pool_DS, FP_OFF(packet) );
+	ecb_ptr->FragmentDescriptor[1].Ptr = MK_FP( real_Send_pool_DS, FP_OFF(packet));
 	ecb_ptr->FragmentDescriptor[1].Length = length;
+
+	real_data_regs.CS = Ipx_segment_call;
+	real_data_regs.IP = Ipx_offset_call;
 
 	real_data_regs.BX.w = IPX_SendPacket;
 	real_data_regs.ES = real_array_DS;
 	real_data_regs.SI.w = FP_OFF( ecb_ptr );
 	real_data_regs.CS = Ipx_segment_call;
 	real_data_regs.IP = Ipx_offset_call;
+
 	if( !IpxCall( &real_data_regs ) )
 		return 0;
 	else
@@ -240,10 +245,17 @@ int IPX::IpxRelinquishControl( void )
 	real_data_regs.BX.w = IPX_RelenquishControl;
 	real_data_regs.CS = Ipx_segment_call;
 	real_data_regs.IP = Ipx_offset_call;
+	disable();
 	if( !IpxCall( &real_data_regs ) )
+	{
+		enable();
 		return 0;
+	}
 	else
+	{
+		enable();
 		return -1;
+	}
 }
 
 /* virtual functions that are overloaded */
@@ -259,7 +271,7 @@ byte IPX::TestInUseField( byte index )
 
 byte IPX::TestCompletion( byte index )
 {
-//  IpxRelinquishControl();
+	//IpxRelinquishControl();
 	if( array[index].ecb.InUseFlag == 0 )
 		return 1;
 	else
@@ -268,7 +280,7 @@ byte IPX::TestCompletion( byte index )
 
 void IPX::CopySourceAddress( byte source_index, byte cb_index )
 {
- if( source_index < 32 )
+ if( source_index < 32 && source_index >=0 )
  {
 	station_list[source_index].state = ON;
 	memset( station_list[source_index].hard_name, 0, 16 );

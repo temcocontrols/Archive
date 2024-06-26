@@ -9,7 +9,6 @@
 #include <bios.h>
 #include <graphics.h>
 #include "aio.h"
-#include "router.h"
 #include "t3000def.h"
 #include "mtkernel.h"
 #include "gwin.h"
@@ -46,6 +45,7 @@ extern unsigned long timesec1970,timestart;
 extern int  Station_NUM;
 extern struct input_buffer input_buffer[10];//[MAX_INPUT_BUFFER];
 extern int ind_input_buffer;
+extern char printAlarms;
 
 extern void chbkg(int lx, int ly, int width, int bkgnd, int frgnd, int unchangecol=127, int height = 0);
 extern int net_call(int command, int arg,  char *data, uint *length , int dest,
@@ -329,8 +329,11 @@ int miscellaneous_init( void )
 			}
 			else
 			{
-			 n=generatealarm(printerrtext, 0, Station_NUM, PRINTER_ALARM, 1, 0, NULL, 0);
-			 if(n>0) err_printer = n;
+			 if( printAlarms )
+			 {
+				n=generatealarm(printerrtext, 0, Station_NUM, PRINTER_ALARM, 1, 0, NULL, 0);
+				if(n>0) err_printer = n;
+			 }
 
 /*
 			 if(err_printer==-1)

@@ -9,9 +9,8 @@
 
 #include "gwin.h"
 #include <dir.h>
-//#include <SYS\STAT.H>
+#include <SYS\STAT.H>
 #include <bios.h>
-#include "baseclas.h"
 
 
 #define BUF_SIZE 4596

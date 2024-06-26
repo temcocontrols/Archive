@@ -3,7 +3,6 @@
 #include <mem.h>
 #include <windows.h>
 #include <graphics.h>
-#include "router.h"
 #include "t3000def.h"
 #include "pc8250.h"
 #include "queue.h"

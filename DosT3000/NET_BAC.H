@@ -9,7 +9,7 @@
 #include "aio.h"
 
 #define NET_NMAXSENDFRAME       4
-#define NET_NMAXRECEIVEFRAME   4
+#define NET_NMAXRECEIVEFRAME    4
 
 typedef enum { SENDING_DG, SENT_DG, SEND_ERROR, IDLE_SD } SENDING_DG_STATUS;
 
@@ -72,7 +72,8 @@ class NET_SENDFRAMEPOOL
 		SEND_FRAME_ENTRY *Frame;
 	public:
 		void Init_frame_pool( SEND_FRAME_ENTRY *buffer );
-		SEND_FRAME_ENTRY *NextFreeEntry( int reply, int command=0 );
+//		SEND_FRAME_ENTRY *NextFreeEntry( int reply, int command=0 );
+		SEND_FRAME_ENTRY *NextFreeEntry( int reply );
 		SEND_FRAME_ENTRY *FrameAvailable( int reply );
 		void RemoveSentEntry( SEND_FRAME_ENTRY *frame_ptr );
 		void Unlock_frame( SEND_FRAME_ENTRY *frame );
@@ -158,6 +159,7 @@ class NET_BAC : public ConnectionData
 		byte                routing_entry;
 		unsigned long       time;
 		byte                end_task;
+		int                 dayofyear;
 
 	protected:
 
@@ -188,6 +190,8 @@ public:
 		void SignOff( void );
 		int  CheckForCommandCompletion( void );
 		void NetControl( void );
+		void sendFrameTask();
+		void receiveFrameTask();
 };
 
 #endif //_NET_BAC_H

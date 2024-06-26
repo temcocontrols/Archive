@@ -26,7 +26,6 @@ enum {PROGR=0, OPERATOR=1 };
 #include "mtkernel.h"
 #include "graph.h"
 #include "parser.h"
-#include "router.h"
 #include "rs485.h"
 #include "ptp.h"
 extern int Black;                 //0
@@ -49,6 +48,7 @@ extern int Blue1;
 extern void mputs(char *);
 
 
+extern int dtr;
 extern int ipxport, rs485port;
 extern Panel_info1 Panel_Info1;
 extern int mode_text;
@@ -232,6 +232,8 @@ long timesave=120000;
 long timereadclock;
 int onesec_virtual;
 //uint far xxxx[100],ind_xxxx;
+char read_inputs_rate_tmp, write_outputs_rate_tmp;
+extern char read_inputs_rate, write_outputs_rate;
 
 void resetc(void)
 {
@@ -323,16 +325,28 @@ int fnc_exec_virtual_code(void)
 	miliseclast = 0;
 */
 /*	virtual_time = 1500;*/
+
+//
+// read inputs
+//
+
 	if(control && blocked1<8)
 	{
-	 blocked = 0;
-	 run_board_flag = 1;
-	 ptr_panel->Aio_Control( GET_ALL, (unsigned char *)ptr_panel->in_data, 0 );
-	 run_board_flag = 0;
-	 if(blocked) blocked1++;
-	 else {blocked1=0;reset1=0;}
-	 ptr_panel->convert_in();
+	 if( !read_inputs_rate_tmp )
+	 {
+		blocked = 0;
+		run_board_flag = 1;
+		ptr_panel->Aio_Control( GET_ALL, (unsigned char *)ptr_panel->in_data, 0 );
+		run_board_flag = 0;
+		if(blocked) blocked1++;
+		else {blocked1=0;reset1=0;}
+		ptr_panel->convert_in();
+		read_inputs_rate_tmp = read_inputs_rate;
+	 }
+	 else
+			read_inputs_rate_tmp--;
 	}
+
 	if (onemin)
 	{
 		check_weekly_routine_flag = 1;
@@ -387,17 +401,22 @@ int fnc_exec_virtual_code(void)
 */
  if(just_load) just_load = 0;
 
+//
+// write outputs
+//
  if(control && blocked1<8)
  {
-	ptr_panel->convert_out();
-	blocked=0;
-	run_board_flag = 1;
-	ptr_panel->Aio_Control( SET_ALL, (unsigned char *)ptr_panel->out_data, 0 );
-	run_board_flag = 0;
-	if(blocked) blocked1++;
-	else {blocked1=0;reset1=0;}
-	if (!tenmin)
+	if( !write_outputs_rate_tmp )
 	{
+	 ptr_panel->convert_out();
+	 blocked=0;
+	 run_board_flag = 1;
+	 ptr_panel->Aio_Control( SET_ALL, (unsigned char *)ptr_panel->out_data, 0 );
+	 run_board_flag = 0;
+	 if(blocked) blocked1++;
+	 else {blocked1=0;reset1=0;}
+	 if (!tenmin)
+	 {
 		blocked=0;
 		run_board_flag = 1;
 		ptr_panel->Aio_Control( SET_RATE, NULL, 0 );
@@ -405,13 +424,17 @@ int fnc_exec_virtual_code(void)
 		if(blocked) blocked1++;
 		else blocked1=0;
 		tenmin++;
+	 }
+	 write_outputs_rate_tmp = write_outputs_rate;
 	}
+	else
+		write_outputs_rate_tmp--;
  }
  if(control && blocked1>=8)
  {
-  resetc();
-  if(!control)
-  {
+	resetc();
+	if(!control)
+	{
 	if(mode_text)
 		mxyputs(20, 23, cardtext, Black, Lightgreen);
 	else
@@ -422,6 +445,8 @@ int fnc_exec_virtual_code(void)
 	reset1 = 0;
 	blocked1=0;
  }
+
+
 //
 // save monitor data
 //
@@ -443,7 +468,7 @@ int fnc_exec_virtual_code(void)
  if( !tensec )
  {
   Str_controller_point *pc;
-  pc = ptr_panel->controllers;
+	pc = ptr_panel->controllers;
   for(i=0;i<MAX_CONS;pc++,i++)
   {
 	if(!pc->input.zero())
@@ -572,7 +597,7 @@ void check_weekly_routine(void)
 			 {
 				 if(n>=0)
 				 {
-					if( p->time2[(k<<1)+1] >= p->time2[(n<<1)+1] && p->time2[k<<1] >= p->time2[n<<1] )
+					if( p->time2[(k<<1)+1] > p->time2[(n<<1)+1] || (p->time2[(k<<1)+1] == p->time2[(n<<1)+1] && p->time2[k<<1] >= p->time2[n<<1]) )
            n = k;
 				 }
 				 else
@@ -2706,7 +2731,7 @@ int phone(char *message)    // phone call
  DIAL_dial  =1;
  DIAL_action=1;
  if( tasks[DIAL].status == SUSPENDED )
-  	 resume(DIAL);
+		 resume(DIAL);
 // resume(DIAL);
 }
 
@@ -2716,15 +2741,20 @@ int outputd(char* adr, int num, int port)
   i = 0;
 	if( port!=COM0 )
   {
+//	 ((class ASYNCRON *)Routing_table[port].ptr)->port->Dtr( !dtr );
+
 	 ((class ASYNCRON *)Routing_table[port].ptr)->port->write_buffer( (char *)adr, num );
 	 l = timestart;
 	 while( ((class ASYNCRON *)Routing_table[port].ptr)->port->isr_data->tx_running )
 	 {
-	  if(timestart > l+6)
-	  {
+		if(timestart > l+6)
+		{
 		break;
-	  }
+		}
 	 }
+
+//	 ((class ASYNCRON *)Routing_table[port].ptr)->port->Dtr( dtr );
+
 	 i=num-((class ASYNCRON *)Routing_table[port].ptr)->port->isr_data->TXQueue.InUseCount();
 	 if( ((class ASYNCRON *)Routing_table[port].ptr)->port->isr_data->tx_running )
 	 {
@@ -2733,8 +2763,8 @@ int outputd(char* adr, int num, int port)
 		 ((class ASYNCRON *)Routing_table[port].ptr)->port->FlushTXBuffer();
 		 ((class ASYNCRON *)Routing_table[port].ptr)->port->resettxrunning();
 	 }
-  }
-  return i;
+	}
+	return i;
 }
 
 int print(char *message)  // print to printer

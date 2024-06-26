@@ -1,9 +1,9 @@
-//#include "setjmp.h"
-#include <math.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include "setjmp.h"
+#include "math.h"
+#include "ctype.h"
+#include "stdlib.h"
+#include "string.h"
+#include "stdio.h"
 #include "t3000def.h"
 #include "parser.h"
 
@@ -41,7 +41,7 @@ extern unsigned long ttimed ;
 
 extern char *prog ;
 extern char *p_buf;
-//extern jmp_buf e_buf ;
+extern jmp_buf e_buf ;
 extern char eoi;
 extern char eol;
 

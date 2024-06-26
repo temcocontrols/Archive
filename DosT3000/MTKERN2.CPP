@@ -6,7 +6,6 @@
 #include <graphics.h>
 #include "mouse.h"
 #include <windows.h>
-#include "router.h"
 #include "t3000def.h"
 #include "mtkernel.h"
 

@@ -238,8 +238,8 @@ int ind_line_array;
 
 /* the ranges and units of the items used */
 char gdescriptor[22];
-char glabel[10];
-char gpointname[11];
+char glabel[17];
+char gpointname[17];
 
 //char huge program_buf[2000];
 
@@ -4640,17 +4640,28 @@ int pointtotext(char *buf,Point_T3000 *point)
 
 int pointtotext(char *buf,Point_Net *point)
 {
- char x[4];
+ char x[6];
  byte num,panel,point_type;
+ int net;
 		 num=point->number;
 		 panel=point->panel;
 		 point_type=point->point_type;
+		 net = point->network;
 		 if (point_type==0)
-			 {
+		 {
 				buf[0]=0;
 				return 1;
-			 }
-		 strcpy(buf,itoa(panel+1,x,10));
+		 }
+		 if(net!=0xFFFF)
+		 {
+			strcpy(buf,itoa(net,x,10));
+			strcat(buf,".");
+		 }
+		 else
+		 {
+			buf[0] = 0;
+		 }
+		 strcat(buf,itoa(panel+1,x,10));
 		 if(panel+1<10 || num+1 < 100)
 			 strcat(buf,lin);
 		 strcat(buf,ptr_panel->info[point_type-1].name);
@@ -5054,7 +5065,7 @@ int get_indiv_point(Point_Net point, char *buf)
 
 int get_point_info(Point_info *point_info, char **des, char **label, char **ontext, char **offtext, char pri, int network)
 {
- char buf[160], buf1[12],*q;
+ char buf[160], buf1[17],*q;
  Point_Net p;
  int num_point,num_net,num_panel,r,t=0;
  byte point_type,var_type;
@@ -5131,40 +5142,43 @@ int get_point_info(Point_info *point_info, char **des, char **label, char **onte
 		point_info->security=0;
 		point_info->decomisioned=0;
 		r=0;
+
 		for(int i=0;i<MAXREMOTEPOINTS82;i++)
 		{
-		if( !remote_points_list[i].info.point.zero() )
+//		if( !remote_points_list[i].info.point.zero() )
+		if( remote_points_list[i].info.point.point_type )
 		{
 		 if( remote_points_list[i].info.point==p )
 		 {
-		  memcpy(buf, &remote_points_list[i].info, sizeof(Point_info));
+			memcpy(buf, &remote_points_list[i].info, sizeof(Point_info));
 
-		  ptr.pinfo = (Point_info *)buf;
-		  point_info->point_value=ptr.pinfo->point_value;
+			ptr.pinfo = (Point_info *)buf;
+			point_info->point_value=ptr.pinfo->point_value;
 			point_info->auto_manual=ptr.pinfo->auto_manual;
-		  point_info->digital_analog=ptr.pinfo->digital_analog;
-		  point_info->security=ptr.pinfo->security;
-		  point_info->decomisioned=ptr.pinfo->decomisioned;
-		  r=ptr.pinfo->units;
-		  point_info->units=r;
-		  if(!point_info->digital_analog)
-		  {
+			point_info->digital_analog=ptr.pinfo->digital_analog;
+			point_info->security=ptr.pinfo->security;
+			point_info->decomisioned=ptr.pinfo->decomisioned;
+			r=ptr.pinfo->units;
+			point_info->units=r;
+			if(!point_info->digital_analog)
+			{
 				if(r < 0) r = 0;
 				num_point=dig_range_array[r].value % 2;
 				if(ontext)
 				 *ontext= &(dig_range_array[r].dunits[!num_point][0]);
 				if(offtext)
 				 *offtext= &(dig_range_array[r].dunits[num_point][0]);
-		  }
-		  break;
+			}
+			break;
 		 }
 		}
-	  }
-	  pointtotext(buf1,&p);
-	  q=ispoint(rtrim(buf1),&num_point,&var_type, &point_type, &num_panel, &num_net, networkaddress, Station_NUM);
-	  strcpy(glabel,q);
+		}
+		pointtotext(buf1,&p);
+		r=0;
+		q=ispoint(rtrim(buf1),&num_point,&var_type, &point_type, &num_panel, &num_net, networkaddress, Station_NUM, &r);
+		strcpy(glabel,q);
 		if(Des)
-	  {
+		{
 		if(point_type!=CON && point_type!=TBL)
 			q = Des->look_descriptor(num_panel,point_type,num_point);
 		if(!q) q = glabel;
@@ -5191,18 +5205,18 @@ int get_point_info(Point_info *point_info, char **des, char **label, char **onte
 						{
 							r -= DIG1;
 							if(r < 0) r = 0;
-//							num_point=dig_range_array[r].value % 2;
+							num_point=dig_range_array[r].value % 2;
 							if(ontext)
-//							 *ontext= &(dig_range_array[r].dunits[!num_point][0]);
-							 *ontext= &(dig_range_array[r].dunits[1][0]);
+								*ontext= &(dig_range_array[r].dunits[!num_point][0]);
+//							 *ontext= &(dig_range_array[r].dunits[1][0]);
 							if(offtext)
-//							 *offtext= &(dig_range_array[r].dunits[num_point][0]);
-							 *offtext= &(dig_range_array[r].dunits[0][0]);
+								 *offtext= &(dig_range_array[r].dunits[num_point][0]);
+//							 *offtext= &(dig_range_array[r].dunits[0][0]);
 						}
 						point_info->units = r;
 						strcpy(gdescriptor,ptr.p_out->description);
 						strcpy(glabel,ptr.p_out->label);
-					  }
+						}
 /*
 						if( OFF_ON <=  r+DIG1 && r+DIG1 <= custom_digital8 )
 						{
@@ -5218,7 +5232,7 @@ int get_point_info(Point_info *point_info, char **des, char **label, char **onte
 	 case IN:
 					 {
 //						Str_in_point *p_in=(Str_in_point *)buf;
-					  if(t)
+						if(t)
 						{
 						point_info->point_value   =ptr.p_in->value;
 						point_info->auto_manual   =ptr.p_in->auto_manual;
@@ -5229,18 +5243,18 @@ int get_point_info(Point_info *point_info, char **des, char **label, char **onte
 						{
 							r -= DIG1;
 							if(r < 0) r = 0;
-//							num_point=dig_range_array[r].value % 2;
+							num_point=dig_range_array[r].value % 2;
 							if(ontext)
-//							 *ontext= &(dig_range_array[r].dunits[!num_point][0]);
-							 *ontext= &(dig_range_array[r].dunits[1][0]);
+							 *ontext= &(dig_range_array[r].dunits[!num_point][0]);
+//							 *ontext= &(dig_range_array[r].dunits[1][0]);
 							if(offtext)
-//							 *offtext= &(dig_range_array[r].dunits[num_point][0]);
-							 *offtext= &(dig_range_array[r].dunits[0][0]);
+							 *offtext= &(dig_range_array[r].dunits[num_point][0]);
+//							 *offtext= &(dig_range_array[r].dunits[0][0]);
 						}
 						point_info->units=r;
 						strcpy(gdescriptor,ptr.p_in->description);
 						strcpy(glabel,ptr.p_in->label);
-					  }
+						}
 /*
 						if( OFF_ON <=  r+DIG1 && r+DIG1 <= custom_digital8 )
 						{
@@ -5266,13 +5280,13 @@ int get_point_info(Point_info *point_info, char **des, char **label, char **onte
 						{
 							r -= DIG1;
 							if(r < 0) r = 0;
-//							num_point=dig_range_array[r].value % 2;
+							num_point=dig_range_array[r].value % 2;
 							if(ontext)
-//							 *ontext= &(dig_range_array[r].dunits[!num_point][0]);
-							 *ontext= &(dig_range_array[r].dunits[1][0]);
+							 *ontext= &(dig_range_array[r].dunits[!num_point][0]);
+//							 *ontext= &(dig_range_array[r].dunits[1][0]);
 							if(offtext)
-//							 *offtext= &(dig_range_array[r].dunits[num_point][0]);
-							 *offtext= &(dig_range_array[r].dunits[0][0]);
+							 *offtext= &(dig_range_array[r].dunits[num_point][0]);
+//							 *offtext= &(dig_range_array[r].dunits[0][0]);
 						}
 						point_info->units=r;
 						strcpy(gdescriptor,ptr.p_var->description);

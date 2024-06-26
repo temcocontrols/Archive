@@ -25,7 +25,6 @@ extern Point_Net localopenscreen;
 extern char GAlarm;
 extern char Panel_Type;
 extern unsigned long Active_Panels;
-extern char NetworkName[16];
 extern int NetworkAddress;
 extern char pixul;
 struct point_info_table {
@@ -92,7 +91,7 @@ extern char save_prg_flag;
 extern char int_disk1;
 extern char check_annual_routine_flag;
 extern char new_alarm_flag;
-extern char sendtime;
+extern char _far sendtime, sendtime_ipx;
 
 extern unsigned char tbl_bank[MAX_TBL_BANK];
 extern unsigned update_t3000exe;
@@ -658,6 +657,7 @@ asm push es
 				setdate(&d);
 				updatetimevars();
         sendtime = 1;
+        sendtime_ipx = 1;
 				enable();
 			 }
 			 asm pop es;

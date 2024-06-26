@@ -8,8 +8,8 @@
 #ifndef _MODEM_DOT_H
 #define _MODEM_DOT_H
 
-#include <conio.h>
 #include "rs232.h"
+#include <conio.h>
 #include "mtkernel.h"
 class Serial;
 class RS232;

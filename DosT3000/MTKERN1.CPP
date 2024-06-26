@@ -1,7 +1,6 @@
 #pragma inline
-
-#include <dos.h>
 #include <windows.h>
+#include <dos.h>
 #include "t3000def.h"
 #include "mtkernel.h"
 #include "aio.h"
@@ -30,7 +29,7 @@ int check_sleepers_all_dead(void);
 
 extern void set_vid_mem( void );
 
-void interrupt ( *oldhandler)(__CPPARGS);
+extern void interrupt ( *oldhandler)(__CPPARGS);
 
 void HookHandlers(void);
 void UnhookHandlers(void);
@@ -50,9 +49,9 @@ extern int int_occured;
 #endif
 
 extern int 	T_Inactivity;
-extern int timepoints;
+extern int timepoints, timepoints_ipx;
 extern long timesave;
-extern char virtual_not_run;
+//extern char virtual_not_run;
 extern char	check_annual_routine_flag;
 extern char	readclock_flag;
 
@@ -76,9 +75,9 @@ extern char timeout, timeout_asyn;
 extern int disconnect_time;
 
 /* Timer interrupt task sheduller */
-extern unsigned char *ptr_dos_flag;
+//extern unsigned char *ptr_dos_flag;
 
-extern int_regs *r;
+//extern int_regs *r;
 
 extern int time_key;
 extern char simulate;
@@ -106,10 +105,10 @@ extern unsigned real_ss;
 
 extern task_struct tasks[NUM_TASKS];
 extern unsigned  read_mon_flag; // i/o semaphore
-extern unsigned  io_out; // i/o semaphore
-extern unsigned  io_out_host;
+extern unsigned  dos_flag; // i/o semaphore
+extern unsigned  dos_host;
 extern unsigned  screen; // i/o semaphore
-extern unsigned  memory; // i/o semaphore
+//extern unsigned  memory; // i/o semaphore
 extern unsigned  t3000_flag; // i/o semaphore
 
 extern unsigned oldss, oldsp;
@@ -284,6 +283,7 @@ void interrupt int8_task_switch( __CPPARGS )
 
 	if(timesave) timesave--;
 	if(timepoints) timepoints--;
+	if(timepoints_ipx) timepoints_ipx--;
 	if(refresh_time) refresh_time--;
 	if(grp_time) grp_time--;
 	if(display_grp_time) display_grp_time--;
@@ -947,17 +947,17 @@ void set_semaphore_dos(void)
 	asm		pop es
 */
 //	 while(*ptr_dos_flag)
-	 while(io_out && io_out_host != tswitch)
+	 while(dos_flag && dos_host != tswitch)
 	 {
 //			semblock( tswitch, &io_out );
 			tasks[tswitch].status  = BLOCKED;
-			tasks[tswitch].pending = &io_out;
+			tasks[tswitch].pending = &dos_flag;
 			task_switch();
 			disable(); // task switch will enable interrupts, so they need
 								 //   to be turned off again
 	 }
-	 io_out = 1;
-	 io_out_host = tswitch;
+	 dos_flag = 1;
+	 dos_host = tswitch;
 	 enable();
 }
 
@@ -966,8 +966,8 @@ void clear_semaphore_dos(void)
 {
 	disable();
 	tasks[tswitch].pending = NULL;
-	io_out = 0;
-	if( restart( &io_out ) )
+	dos_flag = 0;
+	if( restart( &dos_flag ) )
 		task_switch();
 	enable();
 }

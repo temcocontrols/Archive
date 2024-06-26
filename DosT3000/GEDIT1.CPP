@@ -1,7 +1,6 @@
 #include <graphics.h>
 #include <process.h>
 #include <windows.h>
-#include "router.h"
 #include "t3000def.h"
 #include "aio.h"
 #include "mtkernel.h"
@@ -901,7 +900,7 @@ int isdelimit(char c)
 
 int GEdit::desvar(void)
 {
- char *b,q[14], *p, *r;
+ char *b,q[17], *p, *r;
  Point_T3000 point;
  byte point_type,var_type;
  int num_point,num_panel,num_net,k;

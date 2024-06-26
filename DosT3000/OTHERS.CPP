@@ -1,5 +1,4 @@
 #include <windows.h>
-#include <ctype.h>
 #include <math.h>
 #include <bios.h>
 #include <dir.h>
@@ -7,7 +6,8 @@
 #include <string.h>
 #include <graphics.h>
 #include <fcntl.h>
-//#include <SYS\STAT.H>
+#include <SYS\STAT.H>
+#include <ctype.h>
 #include "mouse.h"
 #include "t3000hlp.h"
 

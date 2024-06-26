@@ -32,6 +32,7 @@ int IPX::IpxCall( REAL_MODE_REGISTERS *rm_ptr )
 		mov cx, 0
 		les di, rm_ptr
 		nop
+		nop
 		int 31h
 		pop bp
 		jnc ok_ipx_call
@@ -61,6 +62,7 @@ int IPX::TestDriverPresence( void )
 		mov bl, 2Fh
 		mov bh, 0
 		mov cx, 0
+		nop
 		nop
 		int 31h
 		jc  err_pr

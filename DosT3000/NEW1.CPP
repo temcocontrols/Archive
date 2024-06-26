@@ -12,7 +12,7 @@
 #include "mtkernel.h"
 #include "rs485.h"
 
-#define MAX_TRY 20000
+#define MAX_TRY 30000
 #define SCAN_RATE 3
 
 //#pragma inline
@@ -511,6 +511,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 	byte no_points;
 	uint order, *data_pointer;
 	Aio_Error result = AIO_OK;
+	int xxx,yyy;
 
 	data_pointer = (uint*) data_buffer;
 
@@ -532,6 +533,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 		 else
 			 order = SET_POINT;
 		 outportb( latch, order );
+		 for(xxx=0; xxx<10; xxx++) yyy++;
 		 count = 0;
 		 while( ( inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 		 if( count >= MAX_TRY )
@@ -542,6 +544,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 		 if( card_type != VER0_CARD )
 		 {
 			 outportb( latch, p_number );
+			 for(xxx=0; xxx<10; xxx++) yyy++;
 			 count = 0;
 			 while( ( inportb(status) & 1 ) == 1 && count < MAX_TRY ) count++;
 			 if( count >= MAX_TRY )
@@ -555,6 +558,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 		 else
 			 v_byte =  0x00ff & ( data_pointer[0] >> 8 );
 		 outportb( latch, v_byte );
+		 for(xxx=0; xxx<10; xxx++) yyy++;
 		 count = 0;
 		 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 		 if( count >= MAX_TRY )
@@ -567,6 +571,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 		 else
 			 v_byte = (byte)( data_pointer[0] & 0x00ff ) ;
 		 outportb( latch, v_byte );
+		 for(xxx=0; xxx<10; xxx++) yyy++;
 		 count = 0;
 		 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 		 if( count >= MAX_TRY )
@@ -591,6 +596,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 		 count = 0;
 		 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 		 outportb( latch,order );
+		 for(xxx=0; xxx<10; xxx++) yyy++;
 		 count = 0;
 		 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 		 if( count >= MAX_TRY )
@@ -602,6 +608,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 		 {
 			 order = p_number;
 			 outportb( latch, order );
+			 for(xxx=0; xxx<10; xxx++) yyy++;
 			 count = 0;
 			 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 			 if( count >= MAX_TRY )
@@ -647,6 +654,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 			 count = 0;
 			 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 			 outportb( latch, order);
+  		 for(xxx=0; xxx<10; xxx++) yyy++;
 			 count = 0;
 			 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 			 if( count >= MAX_TRY )
@@ -662,6 +670,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 					else
 						v_byte =  0x00ff & ( data_pointer[i+k*no_points] >> 8 );
 					outportb( latch, (byte)v_byte );
+					for(xxx=0; xxx<10; xxx++) yyy++;
 					count = 0;
 					while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 					if( count >= MAX_TRY )
@@ -675,6 +684,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 					else
 						 v_byte = (byte)( data_pointer[i+k*no_points] & 0x00ff ) ;
 					outportb( latch, (byte)v_byte );
+      	  for(xxx=0; xxx<10; xxx++) yyy++;
 					count = 0;
 					while( (inportb(status) & 1 ) == 1 && count < MAX_TRY ) count++;
 					if( count >= MAX_TRY )
@@ -701,8 +711,10 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 			 latch = boards[k].base_adr;
 			 status = latch + 1;
 			 count = 0;
-			 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
+			 while( ( inportb(status) & 2 ) == 2 && count++ < 5 )
+				 v_byte=inportb(latch);
 			 outportb( latch, order );
+			 for(xxx=0; xxx<10; xxx++) yyy++;
 			 count = 0;
 			 while( ( ( inportb(status) & 1 ) == 1 ) && count < MAX_TRY ) count++;
 			 if( count >= MAX_TRY )
@@ -755,6 +767,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+				 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -766,6 +779,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 													boards[k].quartz_freq / 12000L ) );
 				 v_byte = s_time >> 8;
 				 outportb( latch, v_byte );
+				 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -775,6 +789,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 }
 				 v_byte = s_time & 0x00ff;
 				 outportb( latch, v_byte );
+				 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -795,6 +810,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+    		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -803,6 +819,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 						return AIO_BLOCKED;
 				 }
 				 outportb( latch, boards[k].in_mask );
+				 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -811,6 +828,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 						return AIO_BLOCKED;
 				 }
 				 outportb( latch, boards[k].out_mask );
+				 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -839,6 +857,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 			 count = 0;
 			 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 			 outportb( latch, order );
+   		 for(xxx=0; xxx<10; xxx++) yyy++;
 			 count = 0;
 			 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 			 if( count >= MAX_TRY )
@@ -890,6 +909,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+    		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -901,6 +921,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 {
 					 order = TEST_INTERFACE;
 					 outportb( latch, order );
+      		 for(xxx=0; xxx<10; xxx++) yyy++;
 					 count = 0;
 					 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 					 if( count >= MAX_TRY )
@@ -912,6 +933,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 for( v_byte=0; v_byte<256; v_byte++ )
 				 {
 					 outportb( latch, v_byte );
+      		 for(xxx=0; xxx<10; xxx++) yyy++;
 					 count = 0;
 					 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 					 if( count >= MAX_TRY )
@@ -942,6 +964,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+     		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -953,6 +976,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 {
 					 order = RESET_PC;
 					 outportb( latch, order );
+					 for(xxx=0; xxx<10; xxx++) yyy++;
 					 count = 0;
 					 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 					 if( count >= MAX_TRY )
@@ -1001,6 +1025,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+    		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -1012,6 +1037,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 {
 					 order = WATCHDOG_ON;
 					 outportb( latch, order );
+      		 for(xxx=0; xxx<10; xxx++) yyy++;
 					 count = 0;
 					 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 					 if( count >= MAX_TRY )
@@ -1034,6 +1060,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+    		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -1045,6 +1072,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 {
 					 order = WATCHDOG_OFF;
 					 outportb( latch, order );
+       		 for(xxx=0; xxx<10; xxx++) yyy++;
 					 count = 0;
 					 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 					 if( count >= MAX_TRY )
@@ -1067,6 +1095,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+    		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -1078,6 +1107,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 {
 					 order = SET_WATCHDOG;
 					 outportb( latch, order );
+      		 for(xxx=0; xxx<10; xxx++) yyy++;
 					 count = 0;
 					 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 					 if( count >= MAX_TRY )
@@ -1091,6 +1121,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 													boards[k].quartz_freq/12 * 10000L / 65536L);
 				 v_byte = s_time >> 8;
 				 outportb( latch, v_byte );
+				 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -1100,6 +1131,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 }
 				 v_byte = s_time & 0x00ff;
 				 outportb( latch, v_byte );
+    		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -1120,6 +1152,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+    		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( ( ( inportb(status) & 1 ) == 1 ) && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -1171,6 +1204,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+    		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -1206,6 +1240,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 						return AIO_BLOCKED;
 				 }
 				 outportb( latch, order );
+				 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -1242,6 +1277,7 @@ Aio_Error Aio::Aio_Control( Order comm, byte *data_buffer, byte p_number )
 				 count = 0;
 				 while( ( inportb(status) & 2 ) == 2 && count++ < 5 ) v_byte=inportb(latch);
 				 outportb( latch, order );
+    		 for(xxx=0; xxx<10; xxx++) yyy++;
 				 count = 0;
 				 while( (inportb(status) & 1) == 1 && count < MAX_TRY ) count++;
 				 if( count >= MAX_TRY )
@@ -1751,7 +1787,7 @@ long Aio::convert_in_point( byte point, byte range )
 
 void Aio::convert_out()
 {
-	byte point, range, reverse = 0;
+	byte point, range, reverse;
 	uint val;
 	long value, delta;
 	Str_out_point *outs;
@@ -1765,15 +1801,26 @@ void Aio::convert_out()
 		{
 			if( !outs->digital_analog )
 			{
-				if( range >= OFF_ON && range <= HIGH_LOW )
+				if( range >= OFF_ON && range <= LOW_HIGH )
 					if( outs->control ) val = 4095;
 					else val = 0;
-//				if( range >= ON_OFF && range <= HIGH_LOW )
-//					if( outs->control ) val = 0;
-//					else val = 4095;
+				if( range >= ON_OFF && range <= HIGH_LOW )
+					if( outs->control ) val = 0;
+					else val = 4095;
 				if( range >= custom_digital1 && range <= custom_digital8 )
 					if( outs->control ) val = 4095;
 					else val = 0;
+/*
+				if( range >= OFF_ON && range <= HIGH_LOW )
+					if( outs->control ) val = 4095;
+					else val = 0;
+				if( range >= ON_OFF && range <= HIGH_LOW )
+					if( outs->control ) val = 0;
+					else val = 4095;
+				if( range >= custom_digital1 && range <= custom_digital8 )
+					if( outs->control ) val = 4095;
+					else val = 0;
+*/
 			}
 			else
 			{
@@ -1788,6 +1835,8 @@ void Aio::convert_out()
 						break;
 					case P0_100_Open:
 					case P0_100:
+						reverse = 0;
+/*
 						if( outs->m_del_low < outs->s_del_high )
 							delta = outs->s_del_high - outs->m_del_low;
 						else
@@ -1795,19 +1844,25 @@ void Aio::convert_out()
 							 delta = outs->m_del_low - outs->s_del_high;
 							 reverse++;
 						}
+*/
+						delta = outs->s_del_high - outs->m_del_low;
 //    	      delta *= 100;
+/*
 						if( reverse )
 							value = const100000*(long)outs->s_del_high + delta * (long)outs->value;
 						else value = const100000*(long)outs->m_del_low + delta * (long)outs->value;
+*/
+						value = const100000*(long)outs->m_del_low + delta * (long)outs->value;
 						value /= 100;
-/*  	        asm {
+						/*  	        asm {
 									mov eax, DWORD PTR value
 									mov ebx, eax
 									shl eax, 12
 									sub eax, ebx
 									mov DWORD PTR value, eax
 						}
-*/						val = (uint)( value * const4095 / const100000 );
+*/
+						val = (uint)( value * const4095 / const100000 );
 //						value /= ;
 //    	      val = (uint) value;
 						break;

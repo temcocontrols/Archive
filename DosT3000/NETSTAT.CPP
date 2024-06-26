@@ -2,7 +2,6 @@
 #include "graphics.h"
 #include "recstruc.h"
 #include "fxengine.h"
-#include "router.h"
 #include "t3000def.h"
 #include "parser.h"
 #include <string.h>

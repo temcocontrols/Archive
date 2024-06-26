@@ -104,7 +104,7 @@ void GEdit::operator delete(void *ptr)
 //GEdit::GEdit(uint tx, uint ty, uint bx, uint by, uint stk, char huge *pcode, int length):GWindow(tx,ty,bx,by,stk,0)
 GEdit::GEdit(int tx, int ty, int bx, int by, int stk, char *pcode, int length,
 				 Str_program_point *pprg, int current_prg, int ppanel, int nnetwork)
-				 :GWindow(tx,ty,bx,by,(unsigned int)stk,0, DEFAULT_FONT, 1, 0)
+				 :GWindow(tx,ty,bx,by,stk,0)
 {
  prg_active++;
  grid=1;
